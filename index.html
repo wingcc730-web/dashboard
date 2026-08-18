@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0f766e">
   <title>屯門即時天氣</title>
+  <!-- 引入農曆與假期計算庫 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.7/lunar.js"></script>
   
 <style>
 :root{
@@ -272,8 +274,8 @@ body{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-rig
 
     <section class="panel">
       <div class="traffic-head">
-        <div class="left">往大和／大埔方向</div>
-        <div class="status-pill">次のバス</div>
+        <div class="left">屯門交通</div>
+        <div id="updated" class="status-pill">更新時間：--:--</div>
       </div>
       <div id="busList" class="bus-list"></div>
     </section>
@@ -293,8 +295,6 @@ const MTR = "https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule";
 /*
   交通路線設定：
   第一行＝往方向；第二行＝正在等車的站名。
-  57M 明確使用「業旺邨」，並可避免舊頁面把所有路線寫成「屯門開出」。
-  K53S 為港鐵巴士，改用 MTR 實時 API。
 */
 const BUS_CONFIG = [
   {type:"kmb", route:"57M", dir:"O", direction:"山景邨", waitStop:"業旺邨"},
@@ -324,7 +324,6 @@ function weatherIconFromText(text){
   return "🌤️";
 }
 function apparentTempC(t, rh){
-  // 熱指數／簡化體感估算；高溫高濕時更有參考價值。
   const T = Number(t), R = Number(rh);
   if(!Number.isFinite(T) || !Number.isFinite(R)) return null;
   if(T < 20) return T;
@@ -341,7 +340,6 @@ async function json(url){
   return res.json();
 }
 
-
 const ARWF_TUEN_MUN = "https://maps.weather.gov.hk/ocf/dat/TMN.xml";
 
 function weatherEmoji(value){
@@ -356,7 +354,6 @@ function weatherEmoji(value){
 function parseForecastTime(v){
   if(v == null) return null;
   const s = String(v).trim();
-  // HKO ARWF may use yyyy-mm-dd hh:mm or compact ISO-like strings.
   const d = new Date(s.replace(" ", "T"));
   if(!Number.isNaN(d.getTime())) return d;
   const m = s.match(/(\d{1,2})[:：](\d{2})/);
@@ -385,12 +382,10 @@ function normalizeHourlyRows(payload){
     if(Array.isArray(v)){ v.forEach(walk); return; }
     if(typeof v!=="object") return;
 
-    const keys=Object.keys(v);
     const timeK=firstKey(v,[/fcst.*time/i,/forecast.*time/i,/valid.*time/i,/datetime/i,/date.*time/i,/^time$/i]);
     const tempK=firstKey(v,[/^temp/i,/temperature/i]);
     const weatherK=firstKey(v,[/weather/i,/sky/i,/wx/i,/icon/i,/condition/i]);
 
-    // Form 1: one object per time point.
     if(timeK && tempK){
       const t=parseForecastTime(v[timeK]);
       const temp=toNum(v[tempK]?.value ?? v[tempK]);
@@ -399,7 +394,6 @@ function normalizeHourlyRows(payload){
       }
     }
 
-    // Form 2: object holding parallel arrays.
     if(timeK && Array.isArray(v[timeK]) && tempK && Array.isArray(v[tempK])){
       const times=v[timeK], temps=v[tempK], wv=weatherK && Array.isArray(v[weatherK]) ? v[weatherK] : [];
       for(let i=0;i<Math.min(times.length,temps.length);i++){
@@ -407,7 +401,6 @@ function normalizeHourlyRows(payload){
         if(t && temp!==null) candidates.push({time:t,temp,weather:wv[i] ?? ""});
       }
     }
-
     Object.values(v).forEach(walk);
   }
   walk(payload);
@@ -431,8 +424,6 @@ async function loadHourlyForecast(){
     let payload;
     try{ payload=JSON.parse(text); }
     catch{
-      // Some older ARWF responses are JSON with a text/javascript MIME type.
-      // Retry after removing a BOM if present.
       payload=JSON.parse(text.replace(/^\uFEFF/,"").trim());
     }
 
@@ -481,11 +472,15 @@ async function loadWeather(){
   document.getElementById("humidity").textContent = Number.isFinite(humidity) ? `${humidity}%` : "--%";
   document.getElementById("feels").textContent = Number.isFinite(apparentTempC(temp,humidity)) ? `${apparentTempC(temp,humidity)}°C` : "--°C";
   document.getElementById("uv").textContent = uvObj ? `${safeText(uvObj.value)}${uvObj.desc ? " · "+uvObj.desc : ""}` : "--";
-  document.getElementById("updated").textContent = `資料更新：${safeText(rhr.updateTime || rhr.temperature?.recordTime,"—")}`;
+  
+  const updateTimeString = safeText(rhr.updateTime || rhr.temperature?.recordTime,"—");
+  const timeOnly = updateTimeString.includes("T") ? updateTimeString.split("T")[1].slice(0,5) : updateTimeString.slice(-5);
+  document.getElementById("updated").textContent = `更新時間：${timeOnly}`;
 
   const forecastText = safeText(flw.forecastDesc || flw.forecastDescTC || flw.generalSituation, "暫時未能讀取本港地區天氣預報。");
   document.getElementById("headline").textContent = forecastText.replace(/\s+/g," ").trim();
   document.getElementById("forecastDesc").textContent = forecastText;
+  
   const fToday = fnd.weatherForecast?.[0] || fnd.data?.[0] || {};
   const minT = fToday.forecastMintemp?.value ?? fToday.minTemp?.value ?? fToday.mintemp?.value;
   const maxT = fToday.forecastMaxtemp?.value ?? fToday.maxTemp?.value ?? fToday.maxtemp?.value;
@@ -493,9 +488,18 @@ async function loadWeather(){
     document.getElementById("tempSub").textContent = `今日預測：${minT}°C - ${maxT}°C`;
   }
 
-  const today = fnd.weatherForecast?.[0] || fnd.data?.[0] || {};
-  const psr = today.PSR || today.psr || today.forecastPSR;
-  document.getElementById("psr").textContent = safeText(psr, "未提供");
+  // 修正降雨概率數字讀取
+  const psrObj = fToday.PSR || fToday.psr || fToday.forecastPSR;
+  let psrVal = "未提供";
+  if (typeof psrObj === 'object' && psrObj !== null) {
+    psrVal = psrObj.value ?? psrObj.desc ?? JSON.stringify(psrObj);
+  } else if (psrObj !== undefined && psrObj !== null && psrObj !== "") {
+    psrVal = String(psrObj);
+  }
+  if (psrVal !== "未提供" && !psrVal.includes("%")) {
+    psrVal += "%";
+  }
+  document.getElementById("psr").textContent = psrVal;
 
   document.getElementById("tempIcon").textContent = weatherIconFromText(forecastText);
 
@@ -631,22 +635,54 @@ function loadBuses(){
   BUS_CONFIG.forEach(item=>el.appendChild(busCard(item)));
 }
 
-
-function updateClock(){
+// 自動計算農曆及香港公眾假期，顯示於右上角
+function updateLunarDateAndClock(){
   const now=new Date();
   const hh=String(now.getHours()).padStart(2,"0");
   const mm=String(now.getMinutes()).padStart(2,"0");
   const ss=String(now.getSeconds()).padStart(2,"0");
   document.getElementById("clock").textContent=`${hh}:${mm}:${ss}`;
   document.getElementById("tinyClock").textContent=`${hh}:${mm}`;
-  document.getElementById("date").textContent=`${now.getMonth()+1}月${now.getDate()}日`;
   document.getElementById("tinyDate").textContent=`${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")}`;
+
+  try {
+    const d = Solar.fromDate(now);
+    const lunar = d.getLunar();
+    
+    // 檢查是否有農曆節日或香港公眾/傳統節日
+    let festival = "";
+    const festivals = lunar.getFestivals();
+    const otherFestivals = lunar.getOtherFestivals();
+    
+    if (festivals && festivals.length > 0) {
+      festival = festivals[0];
+    } else if (otherFestivals && otherFestivals.length > 0) {
+      festival = otherFestivals[0];
+    } else {
+      // 檢查常見香港/公曆節日 (如聖誕節等)
+      const solarFestivals = d.getFestivals();
+      if (solarFestivals && solarFestivals.length > 0) {
+        festival = solarFestivals[0];
+      }
+    }
+
+    if (festival) {
+      document.getElementById("date").textContent = festival;
+    } else {
+      const monthName = lunar.getMonthInChinese() + "月";
+      const dayName = lunar.getDayInChinese();
+      document.getElementById("date").textContent = `${monthName}${dayName}`;
+    }
+  } catch (err) {
+    // 備用方案
+    document.getElementById("date").textContent = `${now.getMonth()+1}月${now.getDate()}日`;
+  }
 }
-updateClock();
-setInterval(updateClock,1000);
+
+updateLunarDateAndClock();
+setInterval(updateLunarDateAndClock, 1000);
 
 async function refreshAll(){
-  document.getElementById("headline").textContent="正在更新…";
   try{ await loadWeather(); }
   catch(e){
     document.getElementById("headline").textContent="暫時未能連線至香港天文台開放數據";
@@ -655,8 +691,9 @@ async function refreshAll(){
   loadHourlyForecast();
   loadBuses();
 }
-document.getElementById("refreshBtn").addEventListener("click",refreshAll);
+document.getElementById("refreshBtn").addEventListener("click", refreshAll);
 refreshAll();
+// 每 60 秒自動更新所有資料
 setInterval(refreshAll, 60_000);
 </script>
 </body>
