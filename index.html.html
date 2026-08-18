@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>業旺邨智能 Dashboard</title>
+    <style>
+        /* 基礎排版與背景設定 */
+        body {
+            background-color: #fff8f0; /* 柔和的米黃色背景 */
+            margin: 0;
+            padding: 30px;
+            font-family: 'PingFang HK', 'Helvetica Neue', sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: 100vh;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        /* 卡片設計 */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 3px solid #ffe4e1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 左側：時間與日期 */
+        #time-container {
+            font-size: 90px;
+            font-weight: bold;
+            color: #008b8b; /* 藍綠色 */
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+        #date-container {
+            font-size: 28px;
+            color: #db7093; /* 粉紅色 */
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        /* 左側：天氣資訊 */
+        .weather-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        #temperature {
+            font-size: 80px;
+            color: #ffa500; /* 橙色 */
+            font-weight: bold;
+        }
+        .weather-details {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            font-size: 22px;
+            background: #e0ffff;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        /* 右側：交通資訊 */
+        .bus-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            border-bottom: 3px dashed #ffb6c1;
+            padding-bottom: 15px;
+        }
+        .bus-route {
+            background: #f8f8ff;
+            border: 2px solid #e6e6fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .route-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .route-num {
+            background: #008b8b;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 10px;
+        }
+        .route-dest {
+            font-size: 24px;
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+        .eta-time {
+            font-size: 40px;
+            color: #2e8b57;
+            font-weight: bold;
+        }
+        .eta-sub {
+            text-align: right;
+            font-size: 18px;
+            color: #666;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 左半邊：時間與天氣卡片 -->
+    <div class="card">
+        <div id="time-container">00:00:00</div>
+        <div id="date-container">載入中...</div>
+        
+        <div class="weather-title">☀️ 屯門區即時天氣</div>
+        <div id="temperature">--°C</div>
+        
+        <div class="weather-details">
+            <div>💧 相對濕度: <span id="humidity" style="font-weight:bold;">--</span>%</div>
+        </div>
+    </div>
+
+    <!-- 右半邊：巴士到站卡片 -->
+    <div class="card">
+        <div class="bus-title">🚌 業旺邨 出發巴士班次</div>
+        
+        <!-- 路線：57M -->
+        <div class="bus-route">
+            <div class="route-header">
+                <div class="route-num">57M</div>
+                <div class="route-dest">往 荔景 (北)</div>
+                <div class="eta-time" id="eta-57m-1">連接中...</div>
+            </div>
+            <div class="eta-sub" id="eta-57m-sub">後續班次: --</div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 時鐘與日期更新系統
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('time-container').innerText = timeStr;
+            
+            const days = ['日', '一', '二', '三', '四', '五', '六'];
+            const dateStr = `${now.getMonth() + 1}月${now.getDate()}日 (星期${days[now.getDay()]})`;
+            document.getElementById('date-container').innerText = dateStr;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 2. 獲取香港天文台天氣資訊 (針對屯門)
+        async function fetchWeather() {
+            try {
+                const res = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
+                const data = await res.json();
+                
+                // 從天文台數據中篩選出「屯門」的氣溫
+                const tmTemp = data.temperature.data.find(d => d.place === '屯門');
+                if (tmTemp) {
+                    document.getElementById('temperature').innerText = tmTemp.value + '°C';
+                }
+                
+                // 獲取整體濕度
+                if (data.humidity && data.humidity.data[0]) {
+                    document.getElementById('humidity').innerText = data.humidity.data[0].value;
+                }
+            } catch (error) {
+                console.error("天氣獲取失敗", error);
+            }
+        }
+
+        // 3. 獲取九巴 57M 於「業旺邨」的到站時間
+        let yipWongStopId = null;
+
+        async function fetchBusETA() {
+            try {
+                // 自動尋找業旺邨的專屬 Stop ID (只需找一次)
+                if (!yipWongStopId) {
+                    const routeRes = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/route-stop/57M/outbound/1');
+                    const routeData = await routeRes.json();
+                    
+                    for (let item of routeData.data) {
+                        const stopRes = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop/${item.stop}`);
+                        const stopData = await stopRes.json();
+                        if (stopData.data && stopData.data.name_tc.includes('業旺')) {
+                            yipWongStopId = item.stop;
+                            break;
+                        }
+                    }
+                }
+
+                // 獲取該站點的實時到站數據
+                if (yipWongStopId) {
+                    const etaRes = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${yipWongStopId}`);
+                    const etaData = await etaRes.json();
+                    
+                    // 過濾出 57M 往荔景方向 (dir: O) 的班次
+                    let etas = etaData.data.filter(eta => eta.route === '57M' && eta.dir === 'O');
+                    
+                    if(etas.length > 0) {
+                        let now = new Date();
+                        // 排除已過期的班次並根據時間排序
+                        etas = etas.filter(e => new Date(e.eta) > now).sort((a,b) => new Date(a.eta) - new Date(b.eta));
+                        
+                        if (etas.length > 0) {
+                            let firstBus = etas[0];
+                            let etaDate = new Date(firstBus.eta);
+                            let diffMins = Math.round((etaDate - now) / 60000);
+                            
+                            // 顯示首班車分鐘數
+                            document.getElementById('eta-57m-1').innerText = diffMins > 0 ? `${diffMins} 分鐘` : '即將抵達';
+                            
+                            // 顯示後續兩班車的具體時間
+                            if(etas.length > 1) {
+                                let nextBuses = etas.slice(1, 3).map(e => {
+                                    let time = new Date(e.eta);
+                                    return time.getHours().toString().padStart(2, '0') + ':' + time.getMinutes().toString().padStart(2, '0');
+                                }).join(' / ');
+                                document.getElementById('eta-57m-sub').innerText = '後續班次: ' + nextBuses;
+                            }
+                        } else {
+                            document.getElementById('eta-57m-1').innerText = '暫無班次';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("巴士 ETA 獲取失敗", error);
+                document.getElementById('eta-57m-1').innerText = '網絡錯誤';
+            }
+        }
+
+        // 初始化呼叫並設定自動更新 (每 1 分鐘更新一次數據)
+        fetchWeather();
+        fetchBusETA();
+        setInterval(fetchWeather, 60000);
+        setInterval(fetchBusETA, 60000);
+    </script>
+</body>
+</html>
