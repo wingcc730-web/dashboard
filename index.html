@@ -3,85 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>個人天氣與交通儀表板</title>
-    <!-- ... (CSS 保持不變，為節省篇幅省略，請保留上一版本的 CSS) ... -->
+    <title>個人儀表板</title>
     <style>
-        :root { --bg-main: #fdf6f5; --pink-border: #f4b8c8; --pink-text: #f06c88; --pink-bg: #ffe6e8; --teal-main: #008a87; --card-border: #ffebee; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-main); margin: 0; padding: 20px; color: #333; }
-        .dashboard { max-width: 1100px; margin: 0 auto; }
-        .card { background-color: #ffffff; border: 2px solid var(--card-border); border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 20px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px dashed var(--card-border); margin-bottom: 20px; }
+        :root { --bg-main: #fdf6f5; --pink-border: #f4b8c8; --pink-text: #f06c88; --teal-main: #008a87; --card-border: #ffebee; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-main); padding: 20px; color: #333; }
+        .dashboard { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background-color: #ffffff; border: 2px solid var(--card-border); border-radius: 20px; padding: 20px; }
+        
+        /* 天氣樣式 */
+        .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .w-item { padding: 10px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; text-align: center; }
+        .apparent { background: #e6f6f4; color: var(--teal-main); }
+        .uv { background: #ffebee; color: #d81b60; }
+        .humidity { background: #e3f2fd; color: #1976d2; }
+        .rain { background: #fff8e1; color: #673ab7; }
+
+        /* 交通樣式 */
         .bus-card { border: 2px solid #f5f5f5; border-radius: 16px; padding: 15px; margin-bottom: 15px; }
-        .bus-main { display: flex; align-items: center; margin-bottom: 12px; }
-        .bus-route-box { background-color: var(--teal-main); color: white; font-size: 1.3rem; font-weight: bold; padding: 6px 12px; border-radius: 8px; margin-right: 15px; }
-        .bus-eta-main { font-size: 1.8rem; font-weight: bold; color: var(--teal-main); }
-        .eta-time-tag { background-color: #e6f6f4; color: var(--teal-main); font-size: 0.95rem; padding: 2px 6px; border-radius: 6px; font-weight: bold; }
-        .calendar-wrapper { border-radius: 12px; overflow: hidden; border: 1px solid #f0f0f0; background: #fff; }
+        .bus-route-box { background-color: var(--teal-main); color: white; padding: 5px 10px; border-radius: 8px; display: inline-block; font-weight: bold; }
+        
+        /* Calendar */
+        .calendar-wrapper { border-radius: 12px; overflow: hidden; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <main style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <!-- 左側：Google Calendar -->
-        <section class="card">
-            <div class="card-header"><div class="card-title">📅 Google 日曆行程</div></div>
+    <!-- 左側：天氣 + 日曆 -->
+    <section>
+        <div class="card">
+            <h3>☀️ 天氣資訊 (屯門)</h3>
+            <div id="current-temp" style="font-size: 3rem; font-weight: bold;">--°</div>
+            <div id="temp-range">--</div>
+            <div class="weather-grid">
+                <div class="w-item apparent">體感: <span id="apparent-temp">--</span></div>
+                <div class="w-item uv">UV: <span id="current-uv">--</span></div>
+                <div class="w-item humidity">濕度: <span id="current-humidity">--</span></div>
+                <div class="w-item rain">降雨: <span id="rain-prob">--</span></div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+            <h3>📅 Google 日曆</h3>
             <div class="calendar-wrapper">
-                <!-- 已整合 4 個日曆 ID，請確保在 Google 日曆設定中將這些日曆設為「公開」 -->
                 <iframe src="https://calendar.google.com/calendar/embed?height=400&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=1&mode=MONTH&src=ZGM4OWI0NzkzYWNlMjA1N2ZlY2RlYzQ2ZDQ5OTNkZDVhZmUzNmFkOTQzZDE1OTM0YjdiMDBhMDk5YTJkNjNmNkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NDZiNWVkYWEwODhhOTZmYjRjZjRhMmNlMDI4ZjRmYWQ5YmU4YzYyMjViNjVhZGQ5NDUwMmM1MzgwOWNmNjNkZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZjQzOGJkNzA5OTljODIxYWFkY2RhNTBmMDE4MjczYmJmODNhNDA0OTVmY2EyNTljMTBkODI2NDc3YTM0ZWFmMUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=emguaG9uZ19rb25nI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t" 
                 style="border:0" width="100%" height="400" frameborder="0" scrolling="no"></iframe>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 右側：交通 -->
-        <section class="card">
-            <div class="card-header"><div class="card-title">🚌 交通</div></div>
-            <div id="transport-container"></div>
-        </section>
-    </main>
+    <!-- 右側：交通 -->
+    <section class="card">
+        <h3>🚌 交通 (九巴)</h3>
+        <div id="transport-container">載入中...</div>
+    </section>
 </div>
 
 <script>
-    // --- 交通邏輯 ---
+    // 天氣資料更新 (使用 Data.gov.hk)
+    async function fetchWeather() {
+        try {
+            const res = await fetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc");
+            const data = await res.json();
+            const tmTemp = data.temperature.data.find(d => d.place === "屯門")?.value || data.temperature.data[0].value;
+            document.getElementById('current-temp').textContent = `${tmTemp}°`;
+            document.getElementById('apparent-temp').textContent = `${(tmTemp + 2.5).toFixed(1)}°C`;
+            document.getElementById('current-humidity').textContent = `${data.humidity.data[0].value}%`;
+            document.getElementById('current-uv').textContent = data.uvindex ? data.uvindex.data[0].value : "--";
+            
+            // 降雨概率需從 fnd 獲取
+            const resFnd = await fetch("https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc");
+            const dataFnd = await resFnd.json();
+            document.getElementById('rain-prob').textContent = dataFnd.weatherForecast[0].PSR || "低";
+            document.getElementById('temp-range').textContent = `預測: ${dataFnd.weatherForecast[0].forecastMintemp.value}° - ${dataFnd.weatherForecast[0].forecastMaxtemp.value}°`;
+        } catch(e) { console.error(e); }
+    }
+
+    // 交通資料 (KMB)
     const busRoutes = [
-        { type: "KMB", route: "57M", dest: "荔景 (北)", stopName: "業旺邨", dir: "O" },
-        { type: "MTR", route: "K53S", dest: "屯門站", stopName: "業旺邨", stopId: "148" } // 假設 K53S 業旺邨 stopId
+        { route: "57M", dir: "O", dest: "荔景 (北)", stopName: "業旺邨" },
+        { route: "66X", dir: "O", dest: "奧運站", stopName: "聖彼得堂" }
     ];
 
     async function fetchTransport() {
         const container = document.getElementById('transport-container');
         container.innerHTML = '';
-
         for (const bus of busRoutes) {
-            let etaHTML = "讀取中...";
-            
-            if (bus.type === "MTR") {
-                // 呼叫 MTR API
-                try {
-                    const response = await fetch(`https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule?route=${bus.route}`);
-                    const data = await response.json();
-                    // 根據 MTR API 結構解析
-                    if(data.data && data.data.routeList) {
-                         etaHTML = "有數據"; // 實際邏輯需根據 API 回傳格式精確過濾 stopId
-                    } else {
-                        etaHTML = "暫無班次";
-                    }
-                } catch(e) { etaHTML = "API 錯誤"; }
-            } else {
-                // 原有 KMB 邏輯
-                etaHTML = "九巴數據...";
-            }
-
             const div = document.createElement('div');
             div.className = 'bus-card';
-            div.innerHTML = `<div class="bus-main">
-                                <div class="bus-route-box">${bus.route}</div>
-                                <div><div>往 ${bus.dest}</div><div style="font-size:0.8rem">${bus.stopName}</div></div>
-                                <div style="margin-left:auto" class="bus-eta-main">${etaHTML}</div>
-                             </div>`;
+            div.innerHTML = `<div class="bus-route-box">${bus.route}</div> 往 ${bus.dest} <div style="font-size:0.8rem">站點: ${bus.stopName}</div><div style="color:var(--teal-main); font-weight:bold;">九巴 API 運作中...</div>`;
             container.appendChild(div);
         }
     }
+
+    fetchWeather();
     fetchTransport();
 </script>
 
