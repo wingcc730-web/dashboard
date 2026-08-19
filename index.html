@@ -27,7 +27,7 @@
             margin: 0 auto;
         }
 
-        /* --- 頂部標題列 --- */
+        /* --- 頂部標題列 (修正水平對齊) --- */
         .top-bar {
             background-color: #ffffff;
             border: 2px dashed var(--pink-border);
@@ -35,13 +35,13 @@
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: center; /* 確保整體垂直置中 */
             margin-bottom: 20px;
             box-shadow: 0 4px 10px rgba(255, 230, 232, 0.5);
         }
         .top-bar-left {
             display: flex;
-            align-items: baseline;
+            align-items: center; /* 修正對齊，確保時間與日期在同一水平線 */
             gap: 15px;
         }
         .clock-time {
@@ -50,6 +50,7 @@
             color: var(--teal-main);
             font-family: "Arial Black", Arial, sans-serif;
             letter-spacing: 2px;
+            line-height: 1;
         }
         .clock-date {
             font-size: 1.2rem;
@@ -71,7 +72,6 @@
         /* --- 內容網格 --- */
         .content-grid {
             display: grid;
-            /* 強制設定左右欄位比例，避免內容把格子撐破 */
             grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
             gap: 20px;
         }
@@ -83,7 +83,7 @@
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-            min-width: 0; /* 關鍵修復：防止 Flex/Grid 內部元素撐開父容器 */
+            min-width: 0;
         }
         .card-header {
             display: flex;
@@ -190,6 +190,19 @@
         .forecast-day .temp { font-weight: bold; font-size: 0.95rem; color: #333; }
         .forecast-day .rain { font-size: 0.75rem; color: var(--teal-main); margin-top: 4px; font-weight: bold;}
 
+        /* --- Google Calendar 區塊樣式 --- */
+        .calendar-section {
+            margin-top: 20px;
+            border-top: 2px dashed var(--card-border);
+            padding-top: 15px;
+        }
+        .calendar-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            background: #fff;
+        }
+
         /* --- 交通區塊 --- */
         .bus-card {
             border: 2px solid #f5f5f5;
@@ -225,13 +238,29 @@
             color: #e91e63;
             margin-top: 4px;
         }
+        .bus-eta-group {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
         .bus-eta {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: var(--teal-main);
-            text-align: right;
-            min-width: 70px;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        /* 幾分鐘後方的到達時間黑標籤 */
+        .eta-time-tag {
+            background-color: #333;
+            color: #fff;
+            font-size: 0.9rem;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-weight: bold;
         }
         .bus-sub {
             border-top: 2px dashed #f5f5f5;
@@ -245,11 +274,12 @@
         }
         .sub-pill {
             background-color: #f5f5f5;
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 12px;
             font-weight: bold;
             color: #555;
             white-space: nowrap;
+            font-size: 0.9rem;
         }
         
         /* 隱藏捲軸美化 */
@@ -273,7 +303,7 @@
     </header>
     
     <main class="content-grid">
-        <!-- 左側：天氣區塊 -->
+        <!-- 左側：天氣與日曆區塊 -->
         <section class="card">
             <div class="card-header">
                 <div class="card-title">
@@ -306,7 +336,7 @@
                 </div>
             </div>
             
-            <!-- 未來預測 (改為7天) -->
+            <!-- 未來七天預測 -->
             <div class="forecast-section">
                 <div class="forecast-header">
                     <div>未來七天天氣預測</div>
@@ -314,6 +344,18 @@
                 </div>
                 <div id="forecast-container" class="forecast-container">
                     <div style="color: #999; font-size: 0.9rem;">載入中...</div>
+                </div>
+            </div>
+
+            <!-- Google Calendar 區塊 -->
+            <div class="calendar-section">
+                <div class="forecast-header" style="margin-bottom: 10px;">
+                    <div>📅 Google 日曆行程</div>
+                    <div style="font-size:0.8rem; color:#999;">即時同步</div>
+                </div>
+                <div class="calendar-wrapper">
+                    <!-- 可將 src 替換為你的 Google Calendar 嵌入網址 -->
+                    <iframe src="https://calendar.google.com/calendar/embed?height=280&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0&src=zh-hk.official%23holiday%40group.v.calendar.google.com" style="border:0" width="100%" height="260" frameborder="0" scrolling="no"></iframe>
                 </div>
             </div>
         </section>
@@ -373,7 +415,6 @@
             document.getElementById('temp-range').textContent = `今日預測 : ${todayForecast.forecastMintemp.value}°C - ${todayForecast.forecastMaxtemp.value}°C`;
             document.getElementById('rain-prob').textContent = `${todayForecast.PSR}`;
             
-            // 渲染未來七天預測 (從 8 更改為 7)
             let forecastHTML = '';
             dataFnd.weatherForecast.slice(0, 7).forEach(day => {
                 const d = day.forecastDate.substring(6,8) + "/" + day.forecastDate.substring(4,6);
@@ -396,7 +437,7 @@
         }
     }
 
-    // --- 3. 交通 API 邏輯 ---
+    // --- 3. 交通 API 邏輯 (更新 ETA 時間格式) ---
     const KMB_BASE = "https://data.etabus.gov.hk/v1/transport/kmb";
     const busRoutes = [
         { route: "57M", dir: "O", dest: "荔景 (北)", stopName: "業旺邨" },
@@ -415,6 +456,12 @@
         return exact?.stop || rows[0]?.stop || null;
     }
 
+    function formatEtaTime(etaIso) {
+        if (!etaIso) return "";
+        const d = new Date(etaIso);
+        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
     async function fetchTransport() {
         try {
             const container = document.getElementById('transport-container');
@@ -422,7 +469,7 @@
             
             for (const bus of busRoutes) {
                 const stopId = await getKmbStopId(bus.route, bus.dir, bus.stopName);
-                let mainEtaHTML = `<span style="font-size:1.5rem; color:#999;">-</span>`;
+                let mainEtaHTML = `<span style="font-size:1.4rem; color:#999;">-</span>`;
                 let subEtaHTML = `<div class="sub-pill">暫時未能讀取</div>`;
                 
                 if (stopId) {
@@ -434,17 +481,20 @@
                         .sort((a, b) => new Date(a.eta) - new Date(b.eta))
                         .map(x => {
                             const diff = new Date(x.eta) - new Date();
-                            return Math.max(0, Math.floor(diff / 60000));
+                            const mins = Math.max(0, Math.floor(diff / 60000));
+                            const timeStr = formatEtaTime(x.eta);
+                            return { mins, timeStr };
                         });
                     
                     if (etas.length > 0) {
-                        const firstEta = etas[0] === 0 ? "即將" : etas[0];
-                        mainEtaHTML = `${firstEta} <span style="font-size:1rem; font-weight:normal;">${firstEta === '即將' ? '' : '分鐘'}</span>`;
+                        const first = etas[0];
+                        const firstMinText = first.mins === 0 ? "即將" : `${first.mins} 分鐘`;
+                        mainEtaHTML = `${firstMinText} <span class="eta-time-tag">${first.timeStr}</span>`;
                         
                         if (etas.length > 1) {
-                            subEtaHTML = etas.slice(1).map(e => `<div class="sub-pill">${e} 分鐘</div>`).join("");
+                            subEtaHTML = etas.slice(1).map(e => `<div class="sub-pill">${e.mins}分 (${e.timeStr})</div>`).join("");
                         } else {
-                            subEtaHTML = `<span style="margin-left: 5px;">沒有後續班次</span>`;
+                            subEtaHTML = `<span style="margin-left: 5px; font-size:0.9rem;">沒有後續班次</span>`;
                         }
                     }
                 }
@@ -458,7 +508,9 @@
                             <div class="bus-dest">往 ${bus.dest}</div>
                             <div class="bus-stop">📍 ${bus.stopName}</div>
                         </div>
-                        <div class="bus-eta">${mainEtaHTML}</div>
+                        <div class="bus-eta-group">
+                            <div class="bus-eta">${mainEtaHTML}</div>
+                        </div>
                     </div>
                     <div class="bus-sub">
                         <span>後續班次：</span> ${subEtaHTML}
