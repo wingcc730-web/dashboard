@@ -2,30 +2,9 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width,
-                 initial-scale=1.0,
-                 maximum-scale=1.0,
-                 viewport-fit=cover"
-    >
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="資訊板">
-    <meta name="theme-color" content="#fdf6f5">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>個人天氣與交通儀表板</title>
-
-    <!-- 預先連接常用 API，減少首次連線等待 -->
-    https://data.weather.gov.hk
-    https://data.etabus.gov.hk
-    <link rel="preconnect" href="https://rt.dar.google.com
-
-    <link rel="dns-prefetch" href="https://data.weather.gov.hk">
-  https://rt.data.gov.hk
-    <link://calendar.google.com
 
     <style>
         :root {
@@ -35,103 +14,59 @@
             --pink-bg: #ffe6e8;
             --teal-main: #008a87;
             --card-border: #ffebee;
-
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-right: env(safe-area-inset-right, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-left: env(safe-area-inset-left, 0px);
         }
 
         * {
             box-sizing: border-box;
         }
 
-        html {
-            width: 100%;
-            min-height: 100%;
-            background-color: var(--bg-main);
-            -webkit-text-size-adjust: 100%;
-            text-size-adjust: 100%;
-        }
-
         body {
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Helvetica,
-                Arial,
-                sans-serif;
-
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-main);
             margin: 0;
-
-            padding-top: max(20px, var(--safe-top));
-            padding-right: max(20px, var(--safe-right));
-            padding-bottom: max(20px, var(--safe-bottom));
-            padding-left: max(20px, var(--safe-left));
-
+            padding: 20px;
             color: #333;
-            min-height: 100vh;
-            min-height: 100dvh;
-
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
         }
 
         .dashboard {
-            width: 100%;
             max-width: 1100px;
             margin: 0 auto;
         }
 
-        /* =====================================================
-           頂部標題列
-           ===================================================== */
+        /* --- 頂部標題列 --- */
 
         .top-bar {
             background-color: #ffffff;
             border: 2px dashed var(--pink-border);
             border-radius: 20px;
             padding: 15px 30px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
-
             margin-bottom: 20px;
-
-            box-shadow:
-                0 4px 10px
-                rgba(255, 230, 232, 0.5);
+            box-shadow: 0 4px 10px rgba(255, 230, 232, 0.5);
         }
 
         .top-bar-left {
             display: flex;
             align-items: center;
             gap: 15px;
-            min-width: 0;
         }
 
         .clock-time {
             font-size: 3.2rem;
             font-weight: 900;
             color: var(--teal-main);
-            font-family:
-                "Arial Black",
-                Arial,
-                sans-serif;
+            font-family: "Arial Black", Arial, sans-serif;
             letter-spacing: 2px;
             line-height: 1;
-            white-space: nowrap;
         }
 
         .clock-date {
             font-size: 1.1rem;
             font-weight: bold;
             color: var(--pink-text);
-            white-space: nowrap;
         }
 
         .badge-qixi {
@@ -141,41 +76,27 @@
             border-radius: 20px;
             font-weight: bold;
             font-size: 1.1rem;
-
             display: flex;
             align-items: center;
             gap: 5px;
-
-            white-space: nowrap;
         }
 
-        /* =====================================================
-           內容網格
-           ===================================================== */
+        /* --- 內容網格 --- */
 
         .content-grid {
             display: grid;
-            grid-template-columns:
-                minmax(0, 1.15fr)
-                minmax(0, 0.85fr);
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
             gap: 20px;
-            align-items: start;
         }
 
-        /* =====================================================
-           卡片通用設定
-           ===================================================== */
+        /* --- 卡片通用設定 --- */
 
         .card {
             background-color: #ffffff;
             border: 2px solid var(--card-border);
             border-radius: 20px;
             padding: 20px;
-
-            box-shadow:
-                0 4px 15px
-                rgba(0, 0, 0, 0.02);
-
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
             min-width: 0;
             margin-bottom: 20px;
         }
@@ -184,24 +105,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-
             padding-bottom: 15px;
-            border-bottom:
-                2px dashed var(--card-border);
+            border-bottom: 2px dashed var(--card-border);
             margin-bottom: 20px;
-
-            gap: 10px;
         }
 
         .card-title {
             font-size: 1.3rem;
             font-weight: bold;
-
             display: flex;
             align-items: center;
             gap: 10px;
-
-            min-width: 0;
         }
 
         .update-time {
@@ -214,9 +128,7 @@
             white-space: nowrap;
         }
 
-        /* =====================================================
-           天氣區塊
-           ===================================================== */
+        /* --- 天氣區塊 --- */
 
         .weather-main {
             display: flex;
@@ -253,13 +165,9 @@
         .w-item {
             padding: 15px;
             border-radius: 12px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
-
-            gap: 8px;
-
             font-weight: bold;
             font-size: 1.1rem;
         }
@@ -300,13 +208,10 @@
             color: #333;
         }
 
-        /* =====================================================
-           未來七天天氣預報
-           ===================================================== */
+        /* --- 未來七天天氣預報 --- */
 
         .forecast-section {
-            border-top:
-                2px dashed var(--card-border);
+            border-top: 2px dashed var(--card-border);
             padding-top: 15px;
         }
 
@@ -314,11 +219,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-
             font-weight: bold;
             font-size: 0.95rem;
             color: #333;
-
             margin-bottom: 15px;
         }
 
@@ -326,11 +229,7 @@
             display: flex;
             gap: 12px;
             overflow-x: auto;
-            overflow-y: hidden;
             padding-bottom: 10px;
-
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
         }
 
         .forecast-day {
@@ -360,9 +259,1290 @@
             color: #333;
         }
 
-        /* =====================================================
-           Google Calendar
-           ===================================================== */
+        /* --- Google Calendar --- */
 
         .calendar-section {
-            margin-top: 
+            margin-top: 20px;
+            border-top: 2px dashed var(--card-border);
+            padding-top: 15px;
+        }
+
+        .calendar-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            background: #fff;
+        }
+
+        /* --- 交通區塊 --- */
+
+        .bus-card {
+            border: 2px solid #f5f5f5;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .bus-main {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .bus-route-box {
+            background-color: var(--teal-main);
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-right: 15px;
+            white-space: nowrap;
+        }
+
+        .bus-route-box.lrt-box {
+            background-color: #f39c12;
+        }
+
+        .bus-info {
+            flex-grow: 1;
+        }
+
+        .bus-dest {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .bus-stop {
+            font-size: 0.85rem;
+            color: #e91e63;
+            margin-top: 4px;
+        }
+
+        .bus-eta-group {
+            text-align: right;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .bus-eta-main {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--teal-main);
+        }
+
+        .eta-time-tag {
+            background-color: #e6f6f4;
+            color: var(--teal-main);
+            font-size: 0.95rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            vertical-align: baseline;
+        }
+
+        .bus-sub {
+            border-top: 2px dashed #f5f5f5;
+            padding-top: 12px;
+            font-size: 0.95rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sub-pill {
+            background-color: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: #555;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        ::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #eedddf;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 10px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                padding: 15px;
+            }
+
+            .clock-time {
+                font-size: 2.2rem;
+            }
+
+            .badge-qixi {
+                display: none;
+            }
+
+            .weather-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bus-main {
+                align-items: flex-start;
+            }
+
+            .bus-eta-main {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- 頂部標題列 -->
+    <header class="top-bar">
+        <div class="top-bar-left">
+            <div class="clock-time" id="clock-time">00:00:00</div>
+            <div class="clock-date" id="clock-date">
+                --月--日 (-) 🌸
+            </div>
+        </div>
+
+        <div class="top-bar-right">
+            <div class="badge-qixi">
+                七月初七 ✨ 七夕 🌸
+            </div>
+        </div>
+    </header>
+
+    <main class="content-grid">
+
+        <!-- 左側：天氣與日曆 -->
+        <section class="card">
+
+            <div class="card-header">
+                <div class="card-title">
+                    ☀️ 屯門
+
+                    <span style="
+                        font-size:0.8rem;
+                        background:#e3f2fd;
+                        color:#1976d2;
+                        padding:4px 10px;
+                        border-radius:12px;
+                        margin-left:10px;
+                    ">
+                        🎐 天氣資訊
+                    </span>
+                </div>
+
+                <div
+                    class="update-time"
+                    id="weather-update-time"
+                >
+                    更新時間 : --:--
+                </div>
+            </div>
+
+            <div class="weather-main">
+                <div>
+                    <div
+                        class="temp-large"
+                        id="current-temp"
+                    >
+                        --°
+                    </div>
+
+                    <div
+                        class="temp-range"
+                        id="temp-range"
+                    >
+                        今日預測 : --°C - --°C
+                    </div>
+                </div>
+
+                <div
+                    class="weather-icon-large"
+                    id="main-weather-icon"
+                >
+                    🌧️
+                </div>
+            </div>
+
+            <div class="weather-grid">
+
+                <div class="w-item apparent">
+                    <span>🌡️ 體感溫度</span>
+                    <span id="apparent-temp">--°C</span>
+                </div>
+
+                <div class="w-item uv">
+                    <span>☀️ 紫外線指數</span>
+                    <span id="current-uv">--</span>
+                </div>
+
+                <div class="w-item humidity">
+                    <span>💧 相對濕度</span>
+                    <span id="current-humidity">--%</span>
+                </div>
+
+                <div class="w-item rain">
+                    <span>☂️ 降雨概率</span>
+                    <span id="rain-prob">--%</span>
+                </div>
+
+            </div>
+
+            <div class="forecast-section">
+                <div class="forecast-header">
+                    <div>未來七天天氣預測</div>
+
+                    <div style="font-size:0.8rem; color:#999;">
+                        天文台自動數據
+                    </div>
+                </div>
+
+                <div
+                    id="forecast-container"
+                    class="forecast-container"
+                >
+                    <div style="color:#999; font-size:0.9rem;">
+                        載入中...
+                    </div>
+                </div>
+            </div>
+
+            <div class="calendar-section">
+                <div
+                    class="forecast-header"
+                    style="margin-bottom:10px;"
+                >
+                    <div>📅 Google 日曆行程</div>
+                </div>
+
+                <div class="calendar-wrapper">
+                    <iframe
+                        src="https://calendar.google.com/calendar/embed?height=300&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=1&mode=MONTH&src=dc89b4793ace2057fecdec46d4993dd5afe36ad943d15934b7b00a099a2d63f6%40group.calendar.google.com&color=%238E24AA&src=46b5edaa088a96fb4cf4a2ce028f4fad9be8c6225b65add94502c53809cf63df%40group.calendar.google.com&color=%233F51B5&src=f438bd70999c821aadcda50f018273bbf83a40495fca259c10d826477a34eaf1%40group.calendar.google.com&color=%230B8043"
+                        style="border:0"
+                        width="100%"
+                        height="280"
+                        frameborder="0"
+                        scrolling="no"
+                    ></iframe>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 右側：交通 -->
+        <section class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    🚌 交通
+                </div>
+
+                <div
+                    class="update-time"
+                    id="transport-update-time"
+                >
+                    更新時間 : --:--
+                </div>
+            </div>
+
+            <div id="transport-container">
+                <div style="color:#999; font-size:0.9rem;">
+                    載入中...
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+    /* =========================================================
+       1. 時鐘與日期
+       ========================================================= */
+
+    function updateClock() {
+        const now = new Date();
+
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mm = String(now.getMinutes()).padStart(2, "0");
+        const ss = String(now.getSeconds()).padStart(2, "0");
+
+        document.getElementById("clock-time").textContent =
+            `${hh}:${mm}:${ss}`;
+
+        const month = now.getMonth() + 1;
+        const date = now.getDate();
+
+        const days = [
+            "日",
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六"
+        ];
+
+        const day = days[now.getDay()];
+
+        document.getElementById("clock-date").textContent =
+            `${month}月${date}日 (${day}) 🌸`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+
+    /* =========================================================
+       2. 天氣 API
+       ========================================================= */
+
+    const HKO_RHRREAD =
+        "https://data.weather.gov.hk/weatherAPI/opendata/" +
+        "weather.php?dataType=rhrread&lang=tc";
+
+    const HKO_FND =
+        "https://data.weather.gov.hk/weatherAPI/opendata/" +
+        "weather.php?dataType=fnd&lang=tc";
+
+    function getWeatherIcon(iconCode) {
+        const icons = {
+            1: "☀️",
+            2: "🌤️",
+            3: "⛅",
+            4: "☁️",
+            5: "🌥️",
+            6: "🌧️",
+            7: "🌩️",
+            8: "⛈️",
+            9: "🌫️"
+        };
+
+        return icons[iconCode] || "🌤️";
+    }
+
+    async function fetchWeather() {
+        try {
+            const [resRhr, resFnd] = await Promise.all([
+                fetch(HKO_RHRREAD),
+                fetch(HKO_FND)
+            ]);
+
+            if (!resRhr.ok || !resFnd.ok) {
+                throw new Error("天氣 API HTTP 錯誤");
+            }
+
+            const dataRhr = await resRhr.json();
+            const dataFnd = await resFnd.json();
+
+            const tmTemp =
+                dataRhr.temperature.data.find(
+                    item => item.place === "屯門"
+                )?.value ??
+                dataRhr.temperature.data[0]?.value;
+
+            document.getElementById(
+                "current-temp"
+            ).textContent = `${tmTemp}°`;
+
+            document.getElementById(
+                "apparent-temp"
+            ).textContent =
+                `${(Number(tmTemp) + 2.5).toFixed(1)}°C`;
+
+            document.getElementById(
+                "current-humidity"
+            ).textContent =
+                `${dataRhr.humidity.data[0]?.value ?? "--"}%`;
+
+            const uv =
+                dataRhr.uvindex?.data?.[0]?.value ?? "--";
+
+            const uvDesc =
+                dataRhr.uvindex?.data?.[0]?.desc ?? "";
+
+            document.getElementById(
+                "current-uv"
+            ).textContent =
+                `${uv}${uvDesc ? " · " + uvDesc : ""}`;
+
+            const todayForecast =
+                dataFnd.weatherForecast[0];
+
+            document.getElementById(
+                "temp-range"
+            ).textContent =
+                `今日預測 : ` +
+                `${todayForecast.forecastMintemp.value}°C - ` +
+                `${todayForecast.forecastMaxtemp.value}°C`;
+
+            document.getElementById(
+                "rain-prob"
+            ).textContent =
+                `${todayForecast.PSR || "低"}`;
+
+            let forecastHTML = "";
+
+            dataFnd.weatherForecast
+                .slice(0, 7)
+                .forEach(day => {
+                    const dateStr =
+                        day.forecastDate.substring(6, 8) +
+                        "/" +
+                        day.forecastDate.substring(4, 6);
+
+                    const weekStr =
+                        day.week.substring(2, 3);
+
+                    forecastHTML += `
+                        <div class="forecast-day">
+                            <div class="date">
+                                ${dateStr}(${weekStr})
+                            </div>
+
+                            <div class="icon">
+                                ${getWeatherIcon(day.ForecastIcon)}
+                            </div>
+
+                            <div class="temp">
+                                ${day.forecastMintemp.value}°-
+                                ${day.forecastMaxtemp.value}°
+                            </div>
+                        </div>
+                    `;
+                });
+
+            document.getElementById(
+                "forecast-container"
+            ).innerHTML = forecastHTML;
+
+            const nowTime =
+                new Date().toLocaleTimeString(
+                    "zh-HK",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
+
+            document.getElementById(
+                "weather-update-time"
+            ).textContent =
+                `更新時間 : ${nowTime}`;
+
+        } catch (error) {
+            console.error("天氣獲取失敗", error);
+
+            document.getElementById(
+                "forecast-container"
+            ).innerHTML =
+                `<div style="color:#999;">` +
+                `暫時未能取得預測。` +
+                `</div>`;
+        }
+    }
+
+
+    /* =========================================================
+       3. 交通 API
+       ========================================================= */
+
+    const KMB_BASE =
+        "https://data.etabus.gov.hk/v1/transport/kmb";
+
+    const MTR_BUS_BASE =
+        "https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule";
+
+    const MTR_LRT_BASE =
+        "https://rt.data.gov.hk/v1/transport/mtr/lrt/getSchedule";
+
+    const busRoutes = [
+        {
+            type: "KMB",
+            route: "57M",
+            dir: "O",
+            dest: "荔景 (北)",
+            stopName: "業旺邨"
+        },
+        {
+            type: "KMB",
+            route: "66X",
+            dir: "O",
+            dest: "奧運站",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "KMB",
+            route: "66M",
+            dir: "O",
+            dest: "荃灣 (如心廣場)",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "KMB",
+            route: "258D",
+            dir: "O",
+            dest: "藍田站",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "MTR",
+            route: "K53S",
+            dest: "屯門站",
+            stopName: "業旺邨"
+        },
+        {
+            type: "LRT",
+            route: "輕鐵",
+            dest: "元朗",
+            stationId: "040",
+            stopName: "青山村"
+        }
+    ];
+
+    let transportIsLoading = false;
+
+    /*
+     * 暫存九巴站點詳細資料。
+     */
+    const kmbStopCache = new Map();
+
+    /*
+     * 取得九巴站點名稱。
+     */
+    async function getKmbStopDetail(stopId) {
+        if (kmbStopCache.has(stopId)) {
+            return kmbStopCache.get(stopId);
+        }
+
+        try {
+            const res = await fetch(
+                `${KMB_BASE}/stop/` +
+                `${encodeURIComponent(stopId)}`
+            );
+
+            if (!res.ok) {
+                throw new Error(
+                    `KMB Stop API HTTP ${res.status}`
+                );
+            }
+
+            const data = await res.json();
+            const stopData = data.data || null;
+
+            if (stopData) {
+                kmbStopCache.set(stopId, stopData);
+            }
+
+            return stopData;
+
+        } catch (error) {
+            console.error(
+                `九巴站點資料讀取失敗：${stopId}`,
+                error
+            );
+
+            return null;
+        }
+    }
+
+    /*
+     * 根據路線及站名尋找九巴 stop ID。
+     */
+    async function getKmbStopId(
+        route,
+        dir,
+        targetName
+    ) {
+        try {
+            const apiDir =
+                dir === "O"
+                    ? "outbound"
+                    : "inbound";
+
+            const res = await fetch(
+                `${KMB_BASE}/route-stop/` +
+                `${encodeURIComponent(route)}/` +
+                `${apiDir}/1`
+            );
+
+            if (!res.ok) {
+                throw new Error(
+                    `KMB Route-Stop API HTTP ${res.status}`
+                );
+            }
+
+            const data = await res.json();
+            const routeStops = data.data || [];
+
+            let matchText = targetName;
+
+            if (targetName.includes("業旺")) {
+                matchText = "業旺";
+            } else if (
+                targetName.includes("聖彼得")
+            ) {
+                matchText = "聖彼得";
+            }
+
+            for (const routeStop of routeStops) {
+                if (!routeStop.stop) {
+                    continue;
+                }
+
+                const stopDetail =
+                    await getKmbStopDetail(
+                        routeStop.stop
+                    );
+
+                const stopNameTc =
+                    stopDetail?.name_tc || "";
+
+                if (
+                    stopNameTc.includes(matchText)
+                ) {
+                    return routeStop.stop;
+                }
+            }
+
+            console.warn(
+                `九巴 ${route} 找不到站點：${targetName}`
+            );
+
+            return null;
+
+        } catch (error) {
+            console.error(
+                `九巴 ${route} 尋找站點失敗`,
+                error
+            );
+
+            return null;
+        }
+    }
+
+    function formatEtaTime(etaValue) {
+        const etaDate = new Date(etaValue);
+
+        if (
+            Number.isNaN(etaDate.getTime())
+        ) {
+            return "";
+        }
+
+        return (
+            `${String(etaDate.getHours()).padStart(2, "0")}:` +
+            `${String(etaDate.getMinutes()).padStart(2, "0")}`
+        );
+    }
+
+    /*
+     * 取得九巴 ETA。
+     */
+    async function fetchKmbEtas(bus) {
+        try {
+            const stopId =
+                await getKmbStopId(
+                    bus.route,
+                    bus.dir,
+                    bus.stopName
+                );
+
+            if (!stopId) {
+                return [];
+            }
+
+            const res = await fetch(
+                `${KMB_BASE}/eta/` +
+                `${encodeURIComponent(stopId)}/` +
+                `${encodeURIComponent(bus.route)}/1`
+            );
+
+            if (!res.ok) {
+                throw new Error(
+                    `KMB ETA API HTTP ${res.status}`
+                );
+            }
+
+            const data = await res.json();
+            const now = Date.now();
+
+            return (data.data || [])
+                .filter(item => {
+                    const sameRoute =
+                        String(
+                            item.route || ""
+                        ).toUpperCase() ===
+                        String(
+                            bus.route
+                        ).toUpperCase();
+
+                    const sameDirection =
+                        !item.dir ||
+                        item.dir === bus.dir;
+
+                    const sameServiceType =
+                        String(
+                            item.service_type || "1"
+                        ) === "1";
+
+                    return (
+                        sameRoute &&
+                        sameDirection &&
+                        sameServiceType &&
+                        item.eta
+                    );
+                })
+                .map(item => {
+                    const etaDate =
+                        new Date(item.eta);
+
+                    const etaTimestamp =
+                        etaDate.getTime();
+
+                    if (
+                        Number.isNaN(
+                            etaTimestamp
+                        )
+                    ) {
+                        return null;
+                    }
+
+                    const difference =
+                        etaTimestamp - now;
+
+                    if (difference < -60000) {
+                        return null;
+                    }
+
+                    return {
+                        mins: Math.max(
+                            0,
+                            Math.floor(
+                                difference / 60000
+                            )
+                        ),
+                        timeStr:
+                            formatEtaTime(
+                                item.eta
+                            ),
+                        seq:
+                            Number(
+                                item.eta_seq || 999
+                            )
+                    };
+                })
+                .filter(item => item !== null)
+                .sort((a, b) => {
+                    if (a.mins !== b.mins) {
+                        return a.mins - b.mins;
+                    }
+
+                    return a.seq - b.seq;
+                })
+                .slice(0, 3);
+
+        } catch (error) {
+            console.error(
+                `九巴 ${bus.route} ETA 讀取失敗`,
+                error
+            );
+
+            return [];
+        }
+    }
+
+    /*
+     * 取得港鐵巴士 K53S ETA。
+     */
+    async function fetchMtrBusEtas(bus) {
+        try {
+            const res = await fetch(
+                MTR_BUS_BASE,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        language: "zh",
+                        routeName: bus.route
+                    })
+                }
+            );
+
+            if (!res.ok) {
+                throw new Error(
+                    `MTR Bus API HTTP ${res.status}`
+                );
+            }
+
+            const data = await res.json();
+
+            if (
+                !Array.isArray(data.busStop) ||
+                data.busStop.length === 0
+            ) {
+                return [];
+            }
+
+            /*
+             * K53S 路線站序：
+             * 0 屯門站
+             * 1 天后路
+             * 2 業旺邨
+             * 3 屯門站
+             */
+            const targetStop =
+                data.busStop[2];
+
+            if (
+                !targetStop ||
+                !Array.isArray(targetStop.bus)
+            ) {
+                return [];
+            }
+
+            return targetStop.bus
+                .map(item => {
+                    const seconds = Number(
+                        item.arrivalTimeInSecond
+                    );
+
+                    if (
+                        !Number.isFinite(seconds) ||
+                        seconds < 0 ||
+                        seconds >= 108000
+                    ) {
+                        return null;
+                    }
+
+                    const mins = Math.max(
+                        0,
+                        Math.floor(seconds / 60)
+                    );
+
+                    const etaDate = new Date(
+                        Date.now() +
+                        seconds * 1000
+                    );
+
+                    const timeStr =
+                        `${String(etaDate.getHours()).padStart(2, "0")}:` +
+                        `${String(etaDate.getMinutes()).padStart(2, "0")}`;
+
+                    return {
+                        mins,
+                        timeStr
+                    };
+                })
+                .filter(item => item !== null)
+                .sort((a, b) => a.mins - b.mins)
+                .slice(0, 3);
+
+        } catch (error) {
+            console.error(
+                `港鐵巴士 ${bus.route} 讀取失敗`,
+                error
+            );
+
+            return [];
+        }
+    }
+
+    /*
+     * 取得輕鐵 ETA。
+     */
+    async function fetchLrtEtas(bus) {
+        try {
+            const res = await fetch(
+                `${MTR_LRT_BASE}?station_id=` +
+                `${encodeURIComponent(bus.stationId)}`
+            );
+
+            if (!res.ok) {
+                throw new Error(
+                    `MTR LRT API HTTP ${res.status}`
+                );
+            }
+
+            const data = await res.json();
+            const lrtEtas = [];
+
+            if (
+                data.status === 1 &&
+                Array.isArray(
+                    data.platform_list
+                )
+            ) {
+                data.platform_list.forEach(
+                    platform => {
+                        if (
+                            !Array.isArray(
+                                platform.route_list
+                            )
+                        ) {
+                            return;
+                        }
+
+                        platform.route_list.forEach(
+                            routeInfo => {
+                                if (
+                                    !routeInfo.dest_ch ||
+                                    !routeInfo.dest_ch.includes(
+                                        bus.dest
+                                    )
+                                ) {
+                                    return;
+                                }
+
+                                let minsText =
+                                    routeInfo.time_ch || "";
+
+                                let mins = null;
+
+                                if (
+                                    minsText.includes(
+                                        "分鐘"
+                                    )
+                                ) {
+                                    const value =
+                                        parseInt(
+                                            minsText,
+                                            10
+                                        );
+
+                                    if (
+                                        !Number.isNaN(
+                                            value
+                                        )
+                                    ) {
+                                        mins = value;
+                                    }
+                                } else if (
+                                    minsText.includes(
+                                        "即將"
+                                    ) ||
+                                    minsText.includes(
+                                        "正在"
+                                    )
+                                ) {
+                                    mins = 0;
+                                    minsText =
+                                        "即將到站";
+                                }
+
+                                if (mins === null) {
+                                    return;
+                                }
+
+                                const etaDate =
+                                    new Date(
+                                        Date.now() +
+                                        mins * 60000
+                                    );
+
+                                const timeStr =
+                                    `${String(etaDate.getHours()).padStart(2, "0")}:` +
+                                    `${String(etaDate.getMinutes()).padStart(2, "0")}`;
+
+                                lrtEtas.push({
+                                    routeNo:
+                                        routeInfo.route_no,
+                                    mins,
+                                    minsText,
+                                    timeStr
+                                });
+                            }
+                        );
+                    }
+                );
+            }
+
+            return lrtEtas
+                .sort(
+                    (a, b) =>
+                        a.mins - b.mins
+                )
+                .slice(0, 3);
+
+        } catch (error) {
+            console.error(
+                "輕鐵 API 讀取失敗",
+                error
+            );
+
+            return [];
+        }
+    }
+
+    /*
+     * 建立交通卡片。
+     */
+    function createTransportCard(
+        bus,
+        etas
+    ) {
+        let displayRoute = bus.route;
+
+        let routeBoxClass =
+            "bus-route-box";
+
+        let mainEtaHTML =
+            `<span style="font-size:1.3rem; color:#999;">` +
+            `暫時未能讀取` +
+            `</span>`;
+
+        let subEtaHTML =
+            `<span style="font-size:0.9rem;">` +
+            `沒有後續班次 (或非服務時間)` +
+            `</span>`;
+
+        if (bus.type === "LRT") {
+            routeBoxClass += " lrt-box";
+        }
+
+        if (etas.length > 0) {
+            const first = etas[0];
+
+            if (bus.type === "LRT") {
+                displayRoute =
+                    `輕鐵 ${first.routeNo}`;
+
+                mainEtaHTML =
+                    `${first.minsText} ` +
+                    `<span class="eta-time-tag">` +
+                    `${first.timeStr}` +
+                    `</span>`;
+
+                if (etas.length > 1) {
+                    subEtaHTML = etas
+                        .slice(1)
+                        .map(item => {
+                            return (
+                                `<div class="sub-pill">` +
+                                `${item.routeNo}線: ` +
+                                `${item.minsText} ` +
+                                `(${item.timeStr})` +
+                                `</div>`
+                            );
+                        })
+                        .join("");
+                }
+            } else {
+                const firstMinText =
+                    first.mins === 0
+                        ? "即將"
+                        : `${first.mins} 分鐘`;
+
+                mainEtaHTML =
+                    `${firstMinText} ` +
+                    `<span class="eta-time-tag">` +
+                    `${first.timeStr}` +
+                    `</span>`;
+
+                if (etas.length > 1) {
+                    subEtaHTML = etas
+                        .slice(1)
+                        .map(item => {
+                            return (
+                                `<div class="sub-pill">` +
+                                `${item.mins}分 ` +
+                                `(${item.timeStr})` +
+                                `</div>`
+                            );
+                        })
+                        .join("");
+                }
+            }
+        }
+
+        const card =
+            document.createElement("div");
+
+        card.className = "bus-card";
+
+        card.innerHTML = `
+            <div class="bus-main">
+                <div class="${routeBoxClass}">
+                    ${displayRoute}
+                </div>
+
+                <div class="bus-info">
+                    <div class="bus-dest">
+                        往 ${bus.dest}
+                    </div>
+
+                    <div class="bus-stop">
+                        📍 ${bus.stopName}
+                    </div>
+                </div>
+
+                <div class="bus-eta-group">
+                    <div class="bus-eta-main">
+                        ${mainEtaHTML}
+                    </div>
+                </div>
+            </div>
+
+            <div class="bus-sub">
+                <span>後續班次：</span>
+                ${subEtaHTML}
+            </div>
+        `;
+
+        return card;
+    }
+
+    /*
+     * 同時更新九巴、港鐵巴士及輕鐵。
+     * 每條路線獨立處理錯誤。
+     */
+    async function fetchTransport() {
+        if (transportIsLoading) {
+            return;
+        }
+
+        transportIsLoading = true;
+
+        const container =
+            document.getElementById(
+                "transport-container"
+            );
+
+        try {
+            const results =
+                await Promise.all(
+                    busRoutes.map(
+                        async bus => {
+                            try {
+                                let etas = [];
+
+                                if (
+                                    bus.type === "KMB"
+                                ) {
+                                    etas =
+                                        await fetchKmbEtas(
+                                            bus
+                                        );
+                                } else if (
+                                    bus.type === "MTR"
+                                ) {
+                                    etas =
+                                        await fetchMtrBusEtas(
+                                            bus
+                                        );
+                                } else if (
+                                    bus.type === "LRT"
+                                ) {
+                                    etas =
+                                        await fetchLrtEtas(
+                                            bus
+                                        );
+                                }
+
+                                return {
+                                    bus,
+                                    etas
+                                };
+                            } catch (error) {
+                                console.error(
+                                    `${bus.route} 更新失敗`,
+                                    error
+                                );
+
+                                return {
+                                    bus,
+                                    etas: []
+                                };
+                            }
+                        }
+                    )
+                );
+
+            container.innerHTML = "";
+
+            results.forEach(result => {
+                const card =
+                    createTransportCard(
+                        result.bus,
+                        result.etas
+                    );
+
+                container.appendChild(card);
+            });
+
+            const nowTime =
+                new Date().toLocaleTimeString(
+                    "zh-HK",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
+
+            document.getElementById(
+                "transport-update-time"
+            ).textContent =
+                `更新時間 : ${nowTime}`;
+
+        } catch (error) {
+            console.error(
+                "交通獲取失敗",
+                error
+            );
+
+            container.innerHTML =
+                `<div style="color:#999; font-size:0.9rem;">` +
+                `暫時未能取得交通資料。` +
+                `</div>`;
+
+        } finally {
+            transportIsLoading = false;
+        }
+    }
+
+
+    /* =========================================================
+       啟動及定時更新
+       ========================================================= */
+
+    fetchWeather();
+    fetchTransport();
+
+    setInterval(
+        fetchWeather,
+        60000
+    );
+
+    setInterval(
+        fetchTransport,
+        30000
+    );
+</script>
+
+</body>
+</html>
