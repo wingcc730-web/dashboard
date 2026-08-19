@@ -27,7 +27,7 @@
             margin: 0 auto;
         }
 
-        /* --- 頂部標題列 (參照 image_d64b44.png) --- */
+        /* --- 頂部標題列 --- */
         .top-bar {
             background-color: #ffffff;
             border: 2px dashed var(--pink-border);
@@ -71,7 +71,8 @@
         /* --- 內容網格 --- */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            /* 強制設定左右欄位比例，避免內容把格子撐破 */
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
             gap: 20px;
         }
 
@@ -82,6 +83,7 @@
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            min-width: 0; /* 關鍵修復：防止 Flex/Grid 內部元素撐開父容器 */
         }
         .card-header {
             display: flex;
@@ -105,6 +107,7 @@
             padding: 4px 12px;
             border-radius: 12px;
             font-weight: bold;
+            white-space: nowrap;
         }
 
         /* --- 天氣區塊 --- */
@@ -153,7 +156,7 @@
         .w-item.rain { background: #fff8e1; color: #673ab7; }
         .w-item.rain span { color: #333; }
 
-        /* 天氣預報 (取代原本的逐小時) */
+        /* 天氣預報 */
         .forecast-section {
             border-top: 2px dashed var(--card-border);
             padding-top: 15px;
@@ -207,6 +210,7 @@
             padding: 8px 12px;
             border-radius: 8px;
             margin-right: 15px;
+            white-space: nowrap;
         }
         .bus-info {
             flex-grow: 1;
@@ -227,6 +231,7 @@
             color: var(--teal-main);
             text-align: right;
             min-width: 70px;
+            white-space: nowrap;
         }
         .bus-sub {
             border-top: 2px dashed #f5f5f5;
@@ -244,6 +249,7 @@
             border-radius: 12px;
             font-weight: bold;
             color: #555;
+            white-space: nowrap;
         }
         
         /* 隱藏捲軸美化 */
@@ -300,10 +306,10 @@
                 </div>
             </div>
             
-            <!-- 未來九天預測 -->
+            <!-- 未來預測 (改為7天) -->
             <div class="forecast-section">
                 <div class="forecast-header">
-                    <div>未來九天天氣預測</div>
+                    <div>未來七天天氣預測</div>
                     <div style="font-size:0.8rem; color:#999;">天文台自動數據</div>
                 </div>
                 <div id="forecast-container" class="forecast-container">
@@ -343,7 +349,7 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // --- 2. 天氣 API 邏輯 (使用 data.weather.gov.hk) ---
+    // --- 2. 天氣 API 邏輯 ---
     const HKO_RHRREAD = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc";
     const HKO_FND = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc";
 
@@ -353,26 +359,23 @@
             const dataRhr = await resRhr.json();
             const dataFnd = await resFnd.json();
             
-            // 當前溫度 (尋找屯門，若無則用全港平均)
             const tmTemp = dataRhr.temperature.data.find(d => d.place === "屯門")?.value || dataRhr.temperature.data[0].value;
             document.getElementById('current-temp').textContent = `${tmTemp}°`;
-            // 由於官方無直接體感溫度 API，簡單預估 (可依需求調整)
             document.getElementById('apparent-temp').textContent = `${(tmTemp + 2.5).toFixed(1)}°C`;
             
             document.getElementById('current-humidity').textContent = `${dataRhr.humidity.data[0].value}%`;
             
             const uv = dataRhr.uvindex ? dataRhr.uvindex.data[0].value : "--";
             const uvDesc = dataRhr.uvindex ? dataRhr.uvindex.data[0].desc : "";
-            document.getElementById('current-uv').textContent = `${uv} · ${uvDesc}`;
+            document.getElementById('current-uv').textContent = `${uv} ${uvDesc ? '· '+uvDesc : ''}`;
             
-            // 今日預測範圍與降雨機率
             const todayForecast = dataFnd.weatherForecast[0];
             document.getElementById('temp-range').textContent = `今日預測 : ${todayForecast.forecastMintemp.value}°C - ${todayForecast.forecastMaxtemp.value}°C`;
             document.getElementById('rain-prob').textContent = `${todayForecast.PSR}`;
             
-            // 渲染未來九天預測
+            // 渲染未來七天預測 (從 8 更改為 7)
             let forecastHTML = '';
-            dataFnd.weatherForecast.slice(0, 8).forEach(day => {
+            dataFnd.weatherForecast.slice(0, 7).forEach(day => {
                 const d = day.forecastDate.substring(6,8) + "/" + day.forecastDate.substring(4,6);
                 forecastHTML += `
                     <div class="forecast-day">
@@ -393,7 +396,7 @@
         }
     }
 
-    // --- 3. 交通 API 邏輯 (九巴修復版) ---
+    // --- 3. 交通 API 邏輯 ---
     const KMB_BASE = "https://data.etabus.gov.hk/v1/transport/kmb";
     const busRoutes = [
         { route: "57M", dir: "O", dest: "荔景 (北)", stopName: "業旺邨" },
@@ -403,7 +406,6 @@
     ];
 
     async function getKmbStopId(route, dir, targetName) {
-        // 修復: 將 O / I 轉為 outbound / inbound 供站點 API 使用
         const apiDir = dir === "O" ? "outbound" : (dir === "I" ? "inbound" : dir);
         const res = await fetch(`${KMB_BASE}/route-stop/${encodeURIComponent(route)}/${apiDir}/1`);
         const data = await res.json();
@@ -427,7 +429,6 @@
                     const etaRes = await fetch(`${KMB_BASE}/eta/${stopId}/${bus.route}/1`);
                     const etaData = await etaRes.json();
                     
-                    // 篩選對應方向並計算分鐘數
                     const etas = (etaData.data || [])
                         .filter(x => x.dir === bus.dir && x.eta != null)
                         .sort((a, b) => new Date(a.eta) - new Date(b.eta))
@@ -476,8 +477,8 @@
     // --- 啟動與定時更新 ---
     fetchWeather();
     fetchTransport();
-    setInterval(fetchWeather, 60000);   // 天氣每 1 分鐘更新
-    setInterval(fetchTransport, 30000); // 交通每 30 秒更新
+    setInterval(fetchWeather, 60000);   
+    setInterval(fetchTransport, 30000); 
 </script>
 
 </body>
