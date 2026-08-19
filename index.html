@@ -353,10 +353,10 @@
             <div class="calendar-section">
                 <div class="forecast-header" style="margin-bottom: 10px;">
                     <div>📅 Google 日曆行程</div>
-                    <div style="font-size:0.8rem; color:#999;">月巴Dating / Travel / Working / 香港假日</div>
                 </div>
                 <div class="calendar-wrapper">
-                    <iframe src="https://calendar.google.com/calendar/embed?height=300&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=1&mode=MONTH&src=ZGM4OWI0NzkzYWNlMjA1N2ZlY2RlYzQ2ZDQ5OTNkZDVhZmUzNmFkOTQzZDE1OTM0YjdiMDBhMDk5YTJkNjNmNkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NDZiNWVkYWEwODhhOTZmYjRjZjRhMmNlMDI4ZjRmYWQ5YmU4YzYyMjViNjVhZGQ5NDUwMmM1MzgwOWNmNjNkZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZjQzOGJkNzA5OTljODIxYWFkY2RhNTBmMDE4MjczYmJmODNhNDA0OTVmY2EyNTljMTBkODI2NDc3YTM0ZWFmMUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=emguaG9uZ19rb25nI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t" style="border:0" width="100%" height="280" frameborder="0" scrolling="no"></iframe>
+                    <!-- 已套用指定顏色：月巴Dating(紫 #8E24AA)、Travel(藍 #3F51B5)、Working(綠 #0B8043) -->
+                    <iframe src="https://calendar.google.com/calendar/embed?height=300&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=1&mode=MONTH&src=dc89b4793ace2057fecdec46d4993dd5afe36ad943d15934b7b00a099a2d63f6%40group.calendar.google.com&color=%238E24AA&src=46b5edaa088a96fb4cf4a2ce028f4fad9be8c6225b65add94502c53809cf63df%40group.calendar.google.com&color=%233F51B5&src=f438bd70999c821aadcda50f018273bbf83a40495fca259c10d826477a34eaf1%40group.calendar.google.com&color=%230B8043" style="border:0" width="100%" height="280" frameborder="0" scrolling="no"></iframe>
                 </div>
             </div>
         </section>
@@ -453,8 +453,8 @@
         { type: "KMB", route: "66M", dir: "O", dest: "荃灣 (如心廣場)", stopName: "聖彼得堂" },
         { type: "KMB", route: "258D", dir: "O", dest: "藍田站", stopName: "聖彼得堂" },
         { type: "MTR", route: "K53S", dest: "屯門站", stopName: "業旺邨" },
-        // 新增輕鐵：指定 stationId 為 330 (景峰站，最靠近聖彼德堂)
-        { type: "LRT", route: "輕鐵", dest: "元朗", stationId: "330", stopName: "景峰 (鄰近聖彼德堂)" }
+        // 更新輕鐵：指定 stationId 為 040 (青山村站)
+        { type: "LRT", route: "輕鐵", dest: "元朗", stationId: "040", stopName: "青山村" }
     ];
 
     async function getKmbStopId(route, dir, targetName) {
@@ -483,7 +483,6 @@
             container.innerHTML = '';
             
             for (let bus of busRoutes) {
-                // 為了不影響原始設定，複製一份物件供畫面修改
                 let displayBus = { ...bus };
                 let mainEtaHTML = `<span style="font-size:1.3rem; color:#999;">暫時未能讀取</span>`;
                 let subEtaHTML = `<span style="font-size:0.9rem;">沒有後續班次 (或非服務時間)</span>`;
@@ -552,8 +551,7 @@
                         console.error("MTR Bus API error", err);
                     }
                 } else if (bus.type === "LRT") {
-                    // --- 新增：輕鐵 API 抓取邏輯 ---
-                    routeBoxClass += " lrt-box"; // 幫輕鐵換個顏色標籤
+                    routeBoxClass += " lrt-box";
                     try {
                         const res = await fetch(`${MTR_LRT_BASE}?station_id=${bus.stationId}`);
                         const data = await res.json();
@@ -569,7 +567,6 @@
                                             let timeStr = "";
                                             let mins = 999;
                                             
-                                            // 解析中文時間格式
                                             if (minsText.includes("分鐘")) {
                                                 mins = parseInt(minsText);
                                                 const etaDate = new Date(Date.now() + mins * 60000);
@@ -580,7 +577,7 @@
                                                 const etaDate = new Date();
                                                 timeStr = `${String(etaDate.getHours()).padStart(2, '0')}:${String(etaDate.getMinutes()).padStart(2, '0')}`;
                                             } else {
-                                                return; // 其他狀態如「已離開」則跳過
+                                                return; 
                                             }
                                             
                                             lrtEtas.push({ routeNo: r.route_no, minsText, timeStr, mins });
@@ -589,12 +586,11 @@
                                 }
                             });
                             
-                            // 依照時間遠近排序
                             lrtEtas.sort((a, b) => a.mins - b.mins);
                             
                             if (lrtEtas.length > 0) {
                                 const first = lrtEtas[0];
-                                displayBus.route = `輕鐵 ${first.routeNo}`; // 動態顯示即將到站的輕鐵號碼
+                                displayBus.route = `輕鐵 ${first.routeNo}`;
                                 mainEtaHTML = `${first.minsText} <span class="eta-time-tag">${first.timeStr}</span>`;
                                 
                                 if (lrtEtas.length > 1) {
@@ -607,7 +603,6 @@
                     }
                 }
                 
-                // 渲染交通卡片
                 const card = document.createElement('div');
                 card.className = 'bus-card';
                 card.innerHTML = `
