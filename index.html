@@ -2,15 +2,12 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1, viewport-fit=cover"
     >
-
     <meta name="theme-color" content="#fdf6f5">
     <meta name="apple-mobile-web-app-capable" content="yes">
-
     <meta
         name="apple-mobile-web-app-status-bar-style"
         content="default"
@@ -113,20 +110,17 @@
         }
 
         /*
-         * 公曆日期與農曆標籤使用相同字體大小。
+         * 放大公曆日期，例如「8月19日（三）」。
          */
-        .clock-date,
-        .badge-qixi {
-            font-size: 1.1rem;
-        }
-
         .clock-date {
+            font-size: 1.35rem;
             font-weight: bold;
             color: var(--pink-text);
             white-space: nowrap;
         }
 
         .badge-qixi {
+            font-size: 1.1rem;
             background: var(--pink-bg);
             color: var(--pink-text);
             padding: 8px 20px;
@@ -178,11 +172,9 @@
         .card-title {
             font-size: 1.3rem;
             font-weight: bold;
-
             display: flex;
             align-items: center;
             gap: 10px;
-
             min-width: 0;
         }
 
@@ -374,9 +366,6 @@
             flex-shrink: 0;
         }
 
-        /*
-         * 九巴專用紅色。
-         */
         .bus-route-box.kmb-box {
             background: var(--kmb-red);
         }
@@ -485,11 +474,10 @@
             }
 
             /*
-             * 即使農曆標籤在窄畫面隱藏，
-             * 公曆日期仍保留相同的 1.1rem 字體。
+             * 手機直向日期也放大。
              */
             .clock-date {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
             }
 
             .badge-qixi {
@@ -552,15 +540,15 @@
             }
 
             /*
-             * 橫向模式中，公曆日期與農曆日期同為 0.8rem。
+             * iPhone 橫向日期由 0.8rem 放大至 0.95rem。
              */
-            .clock-date,
-            .badge-qixi {
-                font-size: 0.8rem;
+            .clock-date {
+                font-size: 0.95rem;
             }
 
             .badge-qixi {
                 display: block;
+                font-size: 0.8rem;
                 padding: 5px 10px;
             }
 
@@ -744,6 +732,10 @@
             .top-bar {
                 padding: 14px 20px;
                 margin-bottom: 14px;
+            }
+
+            .clock-date {
+                font-size: 1.3rem;
             }
 
             .card {
@@ -1115,9 +1107,6 @@
         "weatherAPI/opendata/weather.php" +
         "?dataType=fnd&lang=tc";
 
-    /*
-     * 屯門逐小時降雨概率。
-     */
     const RAIN_PROBABILITY_API =
         "https://api.open-meteo.com/v1/forecast" +
         "?latitude=22.3918" +
@@ -1311,9 +1300,6 @@
                 `${today.forecastMintemp.value}°C - ` +
                 `${today.forecastMaxtemp.value}°C`;
 
-            /*
-             * 顯示降雨概率百分比。
-             */
             getElement(
                 "rain-prob"
             ).textContent =
@@ -1344,7 +1330,6 @@
 
                         return `
                             <div class="forecast-day">
-
                                 <div class="date">
                                     ${dateText}(${weekText})
                                 </div>
@@ -1356,7 +1341,6 @@
                                 <div class="temp">
                                     ${day.forecastMintemp.value}°-${day.forecastMaxtemp.value}°
                                 </div>
-
                             </div>
                         `;
                     })
@@ -1452,7 +1436,7 @@
     let kmbStopMapPromise = null;
 
     const KMB_CACHE_KEY =
-        "dashboard_stop_ids_v7";
+        "dashboard_stop_ids_v8";
 
     function readStopCache() {
         try {
@@ -1896,9 +1880,6 @@
         let routeClass =
             "bus-route-box";
 
-        /*
-         * 九巴加入紅色標籤 class。
-         */
         if (
             bus.type === "KMB"
         ) {
