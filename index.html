@@ -514,42 +514,140 @@
                             }
                         }
                     }
-                } else if (bus.type === "MTR") {
-                    try {
-                        const res = await fetch(MTR_BUS_BASE, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ language: 'zh' })
-                        });
-                        const data = await res.json();
-                        
-                        if (data && data.busStop) {
-                            const targetStop = data.busStop.find(s => s.busStopName && s.busStopName.includes(bus.stopName));
-                            if (targetStop && targetStop.routeList) {
-                                const rInfo = targetStop.routeList.find(r => r.routeName === bus.route);
-                                if (rInfo && rInfo.busLocation && rInfo.busLocation.length > 0) {
-                                    const mtrEtas = rInfo.busLocation.map(t => {
-                                        const diffInSeconds = parseInt(t.arrivalTimeInSecond);
-                                        const mins = Math.max(0, Math.floor(diffInSeconds / 60));
-                                        const etaDate = new Date(Date.now() + diffInSeconds * 1000);
-                                        const timeStr = `${String(etaDate.getHours()).padStart(2, '0')}:${String(etaDate.getMinutes()).padStart(2, '0')}`;
-                                        return { mins, timeStr };
-                                    }).filter(t => !isNaN(t.mins)).sort((a, b) => a.mins - b.mins);
+} else if (bus.type === "MTR") {
+    try {
+        /*
+         * 港鐵巴士 API 必須同時提供：
+         * 1. language
+         * 2. routeName
+         */
+        const res = await fetch(*TR_BUS_BASE, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                language: "zh",
+                routeName: bus.route
+            })
+        });
 
-                                    if (mtrEtas.length > 0) {
-                                        const first = mtrEtas[0];
-                                        const firstMinText = first.mins === 0 ? "即將" : `${first.mins} 分鐘`;
-                                        mainEtaHTML = `${firstMinText} <span class="eta-time-tag">${first.timeStr}</span>`;
-                                        if (mtrEtas.length > 1) {
-                                            subEtaHTML = mtrEtas.slice(1).map(e => `<div class="sub-pill">${e.mins}分 (${e.timeStr})</div>`).join("");
-                                        }
-                                    }
-                                }
-                            }
+        if (!res.ok) {
+            throw new Error(`MTR Bus API HTTP Error: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        /*
+         * K53S 路線站序：
+         * busStop[0] = 屯門站
+         * busStop[1] = 天后路
+         * busStop[2] = 業旺邨
+         * busStop[3] = 屯門站
+         *
+         * 所以業旺邨使用 busStop[2]。
+         */
+        if (
+            data &&
+            Array.isArray(data.busStop) &&
+            data.busStop.length >= 3
+        ) {
+            const targetStop = data.busStop[2];
+
+            if (
+                targetStop &&
+                Array.isArray(targetStop.bus) &&
+                targetStop.bus.length > 0
+            ) {
+                const mtrEtas = targetStop.bus
+                    .map(t => {
+                        const diffInSeconds = Number(
+                            t.arrivalTimeInSecond
+                        );
+
+                        /*
+                         * 港鐵 API 有時會用 108000 表示
+                         * 沒有有效的實時到站時間。
+                         */
+                        if (
+                            !Number.isFinite(diffInSeconds) ||
+                            diffInSeconds < 0 ||
+                            diffInSeconds >= 108000
+                        ) {
+                            return null;
                         }
-                    } catch (err) {
-                        console.error("MTR Bus API error", err);
+
+                        const mins = Math.max(
+                            0,
+                            Math.floor(diffInSeconds / 60)
+                        );
+
+                        const etaDate = new Date(
+                            Date.now() + diffInSeconds * 1000
+                        );
+
+                        const timeStr =
+                            `${String(etaDate.getHours()).padStart(2, "0")}:` +
+                            `${String(etaDate.getMinutes()).padStart(2, "0")}`;
+
+                        return {
+                            mins,
+                            timeStr
+                        };
+                    })
+                    .filter(item => item !== null)
+                    .sort((a, b) => a.mins - b.mins);
+
+                if (mtrEtas.length > 0) {
+                    const first = mtrEtas[0];
+
+                    const firstMinText =
+                        first.mins === 0
+                            ? "即將"
+                            : `${first.mins} 分鐘`;
+
+                    mainEtaHTML =
+                        `${firstMinText} ` +
+                        `<span class="eta-time-tag">` +
+                        `${first.timeStr}` +
+                        `</span>`;
+
+                    if (mtrEtas.length > 1) {
+                        subEtaHTML = mtrEtas
+                            .slice(1)
+                            .map(e =>
+                                `<div class="sub-pill">` +
+                                `${e.mins}分 (${e.timeStr})` +
+                                `</div>`
+                            )
+                            .join("");
                     }
+                } else {
+                    mainEtaHTML =
+                        `<span style="font-size:1.3rem; color:#999;">` +
+                        `暫時未有到站資料` +
+                        `</span>`;
+
+                    subEtaHTML =
+                        `<span style="font-size:0.9rem;">` +
+                        `沒有後續班次（或非服務時間）` +
+                        `</span>`;
+                }
+            }
+        }
+    } catch (err) {
+        console.error("MTR Bus K53S API error", err);
+
+        mainEtaHTML =
+            `<span style="font-size:1.3rem; color:#999;">` +
+            `暫時未能讀取` +
+            `</span>`;
+
+        subEtaHTML =
+            `<span style="font-size:0.9rem;">` +
+            `港鐵巴士資料暫時無法連線` +
+            `</span>`;
+    }
                 } else if (bus.type === "LRT") {
                     routeBoxClass += " lrt-box";
                     try {
