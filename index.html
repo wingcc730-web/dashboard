@@ -1,57 +1,2091 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#fdf6f5">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>個人天氣與交通儀表板</title>
-<style>
-:root{--bg-main:#fdf6f5;--pink-border:#f4b8c8;--pink-text:#f06c88;--pink-bg:#ffe6e8;--teal-main:#008a87;--card-border:#ffebee;--safe-top:env(safe-area-inset-top,0px);--safe-right:env(safe-area-inset-right,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px)}
-*{box-sizing:border-box}html{min-height:100%;background:var(--bg-main);-webkit-text-size-adjust:100%;text-size-adjust:100%}body{margin:0;color:#333;background:var(--bg-main);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-top:max(20px,var(--safe-top));padding-right:max(20px,var(--safe-right));padding-bottom:max(20px,var(--safe-bottom));padding-left:max(20px,var(--safe-left));min-height:100vh;min-height:100dvh;overflow-x:hidden}.dashboard{width:100%;max-width:1100px;margin:0 auto}
-.top-bar{background:#fff;border:2px dashed var(--pink-border);border-radius:20px;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px;box-shadow:0 4px 10px rgba(255,230,232,.5)}.top-bar-left{display:flex;align-items:center;gap:15px;min-width:0}.clock-time{font-size:3.2rem;font-weight:900;color:var(--teal-main);font-family:"Arial Black",Arial,sans-serif;letter-spacing:2px;line-height:1;white-space:nowrap}.clock-date{font-size:1.1rem;font-weight:bold;color:var(--pink-text);white-space:nowrap}.badge-qixi{background:var(--pink-bg);color:var(--pink-text);padding:8px 20px;border-radius:20px;font-weight:bold;font-size:1.1rem;white-space:nowrap}
-.content-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:20px;align-items:start}.card{background:#fff;border:2px solid var(--card-border);border-radius:20px;padding:20px;box-shadow:0 4px 15px rgba(0,0,0,.02);min-width:0;margin-bottom:20px}.card-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:15px;border-bottom:2px dashed var(--card-border);margin-bottom:20px}.card-title{font-size:1.3rem;font-weight:bold;display:flex;align-items:center;gap:10px;min-width:0}.weather-label{font-size:.8rem;background:#e3f2fd;color:#1976d2;padding:4px 10px;border-radius:12px;margin-left:10px;white-space:nowrap}.update-time{font-size:.85rem;color:var(--pink-text);background:#fff2f4;padding:4px 12px;border-radius:12px;font-weight:bold;white-space:nowrap}
-.weather-main{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.temp-large{font-size:5rem;font-weight:bold;color:#ffb300;line-height:1}.temp-range{font-size:.95rem;color:#555;font-weight:bold;margin-top:10px}.weather-icon-large{font-size:4.5rem}.weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:25px}.w-item{padding:15px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:bold;font-size:1.1rem}.w-item.apparent{background:#e6f6f4}.w-item.uv{background:#ffebee}.w-item.humidity{background:#e3f2fd}.w-item.rain{background:#fff8e1}
-.forecast-section,.calendar-section{border-top:2px dashed var(--card-border);padding-top:15px}.calendar-section{margin-top:20px}.forecast-header{display:flex;justify-content:space-between;align-items:center;font-weight:bold;font-size:.95rem;margin-bottom:15px}.forecast-container{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding-bottom:10px;-webkit-overflow-scrolling:touch}.forecast-day{flex:0 0 auto;text-align:center;background:#fcfcfc;border:1px solid #f0f0f0;border-radius:12px;padding:10px;min-width:75px}.forecast-day .date{font-size:.85rem;font-weight:bold}.forecast-day .icon{font-size:1.6rem;margin:6px 0}.forecast-day .temp{font-weight:bold;font-size:.9rem}.calendar-wrapper{border-radius:12px;overflow:hidden;border:1px solid #f0f0f0;background:#fff;min-height:280px}.calendar-wrapper iframe{display:block;width:100%;height:280px;border:0}
-.bus-card{border:2px solid #f5f5f5;border-radius:16px;padding:15px;margin-bottom:15px}.bus-card:last-child{margin-bottom:0}.bus-main{display:flex;align-items:center;margin-bottom:12px;min-width:0}.bus-route-box{background:var(--teal-main);color:#fff;font-size:1.3rem;font-weight:bold;padding:6px 12px;border-radius:8px;margin-right:15px;white-space:nowrap;flex-shrink:0}.bus-route-box.lrt-box{background:#f39c12}.bus-info{flex:1;min-width:0}.bus-dest{font-weight:bold;font-size:1.1rem}.bus-stop{font-size:.85rem;color:#e91e63;margin-top:4px}.bus-eta-group{flex-shrink:0;text-align:right}.bus-eta-main{font-size:1.8rem;font-weight:bold;color:var(--teal-main);white-space:nowrap}.eta-time-tag{background:#e6f6f4;color:var(--teal-main);font-size:.95rem;padding:2px 6px;border-radius:6px;font-weight:bold;white-space:nowrap}.bus-sub{border-top:2px dashed #f5f5f5;padding-top:12px;font-size:.95rem;color:#666;display:flex;align-items:center;flex-wrap:wrap;gap:8px}.sub-pill{background:#f5f5f5;padding:4px 10px;border-radius:12px;font-weight:bold;color:#555;white-space:nowrap;font-size:.9rem}.loading-message{color:#999;font-size:.9rem}
-::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#eedddf;border-radius:10px}
-@media(max-width:800px){body{padding-top:max(10px,var(--safe-top));padding-right:max(10px,var(--safe-right));padding-bottom:max(10px,var(--safe-bottom));padding-left:max(10px,var(--safe-left))}.content-grid{grid-template-columns:1fr;gap:12px}.top-bar{padding:14px;margin-bottom:12px}.clock-time{font-size:2.2rem}.clock-date{font-size:.95rem}.badge-qixi{display:none}.card{padding:14px;margin-bottom:12px}.weather-grid{grid-template-columns:1fr;gap:10px}.bus-main{align-items:flex-start}.bus-eta-main{font-size:1.3rem}}
-@media(orientation:landscape) and (max-height:500px){html{font-size:13px}body{padding-top:max(6px,var(--safe-top));padding-right:max(8px,var(--safe-right));padding-bottom:max(8px,var(--safe-bottom));padding-left:max(8px,var(--safe-left))}.dashboard{max-width:none}.top-bar{padding:7px 14px;margin-bottom:8px;border-radius:14px}.top-bar-left{gap:10px}.clock-time{font-size:2rem;letter-spacing:1px}.clock-date{font-size:.82rem}.badge-qixi{display:block;font-size:.8rem;padding:5px 10px}.content-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:8px}.card{padding:9px;border-radius:14px;margin-bottom:8px}.card-header{padding-bottom:7px;margin-bottom:8px}.card-title{font-size:1rem;gap:4px}.weather-label{font-size:.65rem;padding:3px 6px;margin-left:3px}.update-time{font-size:.65rem;padding:3px 6px}.weather-main{margin-bottom:8px}.temp-large{font-size:3rem}.temp-range{font-size:.72rem;margin-top:4px}.weather-icon-large{font-size:2.8rem}.weather-grid{grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}.w-item{padding:7px;border-radius:8px;font-size:.72rem}.forecast-section{padding-top:7px}.forecast-header{font-size:.72rem;margin-bottom:6px}.forecast-container{gap:5px;padding-bottom:4px}.forecast-day{min-width:55px;padding:5px;border-radius:8px}.forecast-day .date{font-size:.66rem}.forecast-day .icon{font-size:1.05rem;margin:2px 0}.forecast-day .temp{font-size:.64rem}.calendar-section{margin-top:8px;padding-top:7px}.calendar-wrapper,.calendar-wrapper iframe{height:170px;min-height:170px}.bus-card{padding:7px;margin-bottom:5px;border-radius:10px}.bus-main{margin-bottom:5px}.bus-route-box{font-size:.88rem;padding:4px 7px;border-radius:6px;margin-right:7px}.bus-dest{font-size:.75rem}.bus-stop{font-size:.62rem;margin-top:2px}.bus-eta-main{font-size:.92rem}.eta-time-tag{font-size:.64rem;padding:2px 4px}.bus-sub{padding-top:5px;font-size:.62rem;gap:4px}.sub-pill{padding:2px 5px;font-size:.61rem}}
-@media(min-width:801px) and (max-width:1400px) and (min-height:501px){body{padding-top:max(14px,var(--safe-top));padding-right:max(14px,var(--safe-right));padding-bottom:max(14px,var(--safe-bottom));padding-left:max(14px,var(--safe-left))}.dashboard{max-width:1200px}.content-grid{gap:14px}.top-bar{padding:14px 20px;margin-bottom:14px}.card{padding:15px;border-radius:16px}.weather-grid{gap:10px}.w-item{padding:11px;font-size:.9rem}.calendar-wrapper,.calendar-wrapper iframe{height:240px;min-height:240px}.bus-card{padding:11px;margin-bottom:10px}.bus-route-box{font-size:1.05rem;padding:5px 9px;margin-right:9px}.bus-eta-main{font-size:1.3rem}}
-</style>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#fdf6f5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="default"
+    >
+
+    <title>個人天氣與交通儀表板</title>
+
+    <style>
+        :root {
+            --bg-main: #fdf6f5;
+            --pink-border: #f4b8c8;
+            --pink-text: #f06c88;
+            --pink-bg: #ffe6e8;
+            --teal-main: #008a87;
+            --card-border: #ffebee;
+
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+            background: var(--bg-main);
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        body {
+            margin: 0;
+            color: #333;
+            background: var(--bg-main);
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+
+            padding-top: max(20px, var(--safe-top));
+            padding-right: max(20px, var(--safe-right));
+            padding-bottom: max(20px, var(--safe-bottom));
+            padding-left: max(20px, var(--safe-left));
+
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* 頂部標題列 */
+
+        .top-bar {
+            background: #fff;
+            border: 2px dashed var(--pink-border);
+            border-radius: 20px;
+            padding: 15px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+
+            margin-bottom: 20px;
+
+            box-shadow:
+                0 4px 10px
+                rgba(255, 230, 232, 0.5);
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 0;
+        }
+
+        .clock-time {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--teal-main);
+            font-family: "Arial Black", Arial, sans-serif;
+            letter-spacing: 2px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .clock-date {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--pink-text);
+            white-space: nowrap;
+        }
+
+        .badge-qixi {
+            background: var(--pink-bg);
+            color: var(--pink-text);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            white-space: nowrap;
+        }
+
+        /* 內容網格 */
+
+        .content-grid {
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1.15fr)
+                minmax(0, 0.85fr);
+
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* 卡片 */
+
+        .card {
+            background: #fff;
+            border: 2px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, 0.02);
+
+            min-width: 0;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+
+            padding-bottom: 15px;
+            border-bottom: 2px dashed var(--card-border);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            min-width: 0;
+        }
+
+        .weather-label {
+            font-size: 0.8rem;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        .update-time {
+            font-size: 0.85rem;
+            color: var(--pink-text);
+            background: #fff2f4;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* 天氣 */
+
+        .weather-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .temp-large {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #ffb300;
+            line-height: 1;
+        }
+
+        .temp-range {
+            font-size: 0.95rem;
+            color: #555;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .weather-icon-large {
+            font-size: 4.5rem;
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .w-item {
+            padding: 15px;
+            border-radius: 12px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .w-item.apparent {
+            background: #e6f6f4;
+        }
+
+        .w-item.uv {
+            background: #ffebee;
+        }
+
+        .w-item.humidity {
+            background: #e3f2fd;
+        }
+
+        .w-item.rain {
+            background: #fff8e1;
+        }
+
+        /* 天氣預報 */
+
+        .forecast-section,
+        .calendar-section {
+            border-top: 2px dashed var(--card-border);
+            padding-top: 15px;
+        }
+
+        .calendar-section {
+            margin-top: 20px;
+        }
+
+        .forecast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .forecast-container {
+            display: flex;
+            gap: 12px;
+
+            overflow-x: auto;
+            overflow-y: hidden;
+
+            padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .forecast-day {
+            flex: 0 0 auto;
+            text-align: center;
+            background: #fcfcfc;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 10px;
+            min-width: 75px;
+        }
+
+        .forecast-day .date {
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .forecast-day .icon {
+            font-size: 1.6rem;
+            margin: 6px 0;
+        }
+
+        .forecast-day .temp {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* Google Calendar */
+
+        .calendar-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            background: #fff;
+            min-height: 280px;
+        }
+
+        .calendar-wrapper iframe {
+            display: block;
+            width: 100%;
+            height: 280px;
+            border: 0;
+        }
+
+        /* 交通 */
+
+        .bus-card {
+            border: 2px solid #f5f5f5;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .bus-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .bus-main {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            min-width: 0;
+        }
+
+        .bus-route-box {
+            background: var(--teal-main);
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-right: 15px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .bus-route-box.lrt-box {
+            background: #f39c12;
+        }
+
+        .bus-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .bus-dest {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .bus-stop {
+            font-size: 0.85rem;
+            color: #e91e63;
+            margin-top: 4px;
+        }
+
+        .bus-eta-group {
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .bus-eta-main {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--teal-main);
+            white-space: nowrap;
+        }
+
+        .eta-time-tag {
+            background: #e6f6f4;
+            color: var(--teal-main);
+            font-size: 0.95rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .bus-sub {
+            border-top: 2px dashed #f5f5f5;
+            padding-top: 12px;
+            font-size: 0.95rem;
+            color: #666;
+
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sub-pill {
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: #555;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .loading-message {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        /* 捲軸 */
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #eedddf;
+            border-radius: 10px;
+        }
+
+        /* 手機直向及較窄視窗 */
+
+        @media only screen and (max-width: 800px) {
+            body {
+                padding-top: max(10px, var(--safe-top));
+                padding-right: max(10px, var(--safe-right));
+                padding-bottom: max(10px, var(--safe-bottom));
+                padding-left: max(10px, var(--safe-left));
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .top-bar {
+                padding: 14px;
+                margin-bottom: 12px;
+            }
+
+            .clock-time {
+                font-size: 2.2rem;
+            }
+
+            .clock-date {
+                font-size: 0.95rem;
+            }
+
+            .badge-qixi {
+                display: none;
+            }
+
+            .card {
+                padding: 14px;
+                margin-bottom: 12px;
+            }
+
+            .weather-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .bus-main {
+                align-items: flex-start;
+            }
+
+            .bus-eta-main {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* iPhone 橫向資訊板模式 */
+
+        @media only screen
+            and (orientation: landscape)
+            and (max-height: 500px) {
+
+            html {
+                font-size: 13px;
+            }
+
+            body {
+                padding-top: max(6px, var(--safe-top));
+                padding-right: max(8px, var(--safe-right));
+                padding-bottom: max(8px, var(--safe-bottom));
+                padding-left: max(8px, var(--safe-left));
+            }
+
+            .dashboard {
+                max-width: none;
+            }
+
+            .top-bar {
+                padding: 7px 14px;
+                margin-bottom: 8px;
+                border-radius: 14px;
+            }
+
+            .top-bar-left {
+                gap: 10px;
+            }
+
+            .clock-time {
+                font-size: 2rem;
+                letter-spacing: 1px;
+            }
+
+            .clock-date {
+                font-size: 0.82rem;
+            }
+
+            .badge-qixi {
+                display: block;
+                font-size: 0.8rem;
+                padding: 5px 10px;
+            }
+
+            .content-grid {
+                grid-template-columns:
+                    minmax(0, 1.05fr)
+                    minmax(0, 0.95fr);
+
+                gap: 8px;
+            }
+
+            .card {
+                padding: 9px;
+                border-radius: 14px;
+                margin-bottom: 8px;
+            }
+
+            .card-header {
+                padding-bottom: 7px;
+                margin-bottom: 8px;
+            }
+
+            .card-title {
+                font-size: 1rem;
+                gap: 4px;
+            }
+
+            .weather-label {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+                margin-left: 3px;
+            }
+
+            .update-time {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+            }
+
+            .weather-main {
+                margin-bottom: 8px;
+            }
+
+            .temp-large {
+                font-size: 3rem;
+            }
+
+            .temp-range {
+                font-size: 0.72rem;
+                margin-top: 4px;
+            }
+
+            .weather-icon-large {
+                font-size: 2.8rem;
+            }
+
+            .weather-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-bottom: 8px;
+            }
+
+            .w-item {
+                padding: 7px;
+                border-radius: 8px;
+                font-size: 0.72rem;
+            }
+
+            .forecast-section {
+                padding-top: 7px;
+            }
+
+            .forecast-header {
+                font-size: 0.72rem;
+                margin-bottom: 6px;
+            }
+
+            .forecast-container {
+                gap: 5px;
+                padding-bottom: 4px;
+            }
+
+            .forecast-day {
+                min-width: 55px;
+                padding: 5px;
+                border-radius: 8px;
+            }
+
+            .forecast-day .date {
+                font-size: 0.66rem;
+            }
+
+            .forecast-day .icon {
+                font-size: 1.05rem;
+                margin: 2px 0;
+            }
+
+            .forecast-day .temp {
+                font-size: 0.64rem;
+            }
+
+            .calendar-section {
+                margin-top: 8px;
+                padding-top: 7px;
+            }
+
+            .calendar-wrapper,
+            .calendar-wrapper iframe {
+                height: 170px;
+                min-height: 170px;
+            }
+
+            .bus-card {
+                padding: 7px;
+                margin-bottom: 5px;
+                border-radius: 10px;
+            }
+
+            .bus-main {
+                margin-bottom: 5px;
+            }
+
+            .bus-route-box {
+                font-size: 0.88rem;
+                padding: 4px 7px;
+                border-radius: 6px;
+                margin-right: 7px;
+            }
+
+            .bus-dest {
+                font-size: 0.75rem;
+            }
+
+            .bus-stop {
+                font-size: 0.62rem;
+                margin-top: 2px;
+            }
+
+            .bus-eta-main {
+                font-size: 0.92rem;
+            }
+
+            .eta-time-tag {
+                font-size: 0.64rem;
+                padding: 2px 4px;
+            }
+
+            .bus-sub {
+                padding-top: 5px;
+                font-size: 0.62rem;
+                gap: 4px;
+            }
+
+            .sub-pill {
+                padding: 2px 5px;
+                font-size: 0.61rem;
+            }
+        }
+
+        /* iPad 及一般平板 */
+
+        @media only screen
+            and (min-width: 801px)
+            and (max-width: 1400px)
+            and (min-height: 501px) {
+
+            body {
+                padding-top: max(14px, var(--safe-top));
+                padding-right: max(14px, var(--safe-right));
+                padding-bottom: max(14px, var(--safe-bottom));
+                padding-left: max(14px, var(--safe-left));
+            }
+
+            .dashboard {
+                max-width: 1200px;
+            }
+
+            .content-grid {
+                gap: 14px;
+            }
+
+            .top-bar {
+                padding: 14px 20px;
+                margin-bottom: 14px;
+            }
+
+            .card {
+                padding: 15px;
+                border-radius: 16px;
+            }
+
+            .weather-grid {
+                gap: 10px;
+            }
+
+            .w-item {
+                padding: 11px;
+                font-size: 0.9rem;
+            }
+
+            .calendar-wrapper,
+            .calendar-wrapper iframe {
+                height: 240px;
+                min-height: 240px;
+            }
+
+            .bus-card {
+                padding: 11px;
+                margin-bottom: 10px;
+            }
+
+            .bus-route-box {
+                font-size: 1.05rem;
+                padding: 5px 9px;
+                margin-right: 9px;
+            }
+
+            .bus-eta-main {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
 </head>
+
 <body>
+
 <div class="dashboard">
-<header class="top-bar"><div class="top-bar-left"><div class="clock-time" id="clock-time">00:00:00</div><div class="clock-date" id="clock-date">--月--日 (-) 🌸</div></div><div class="badge-qixi">七月初七 ✨ 七夕 🌸</div></header>
-<main class="content-grid">
-<section class="card">
-<div class="card-header"><div class="card-title">☀️ 屯門 <span class="weather-label">🎐 天氣資訊</span></div><div class="update-time" id="weather-update-time">更新時間 : --:--</div></div>
-<div class="weather-main"><div><div class="temp-large" id="current-temp">--°</div><div class="temp-range" id="temp-range">今日預測 : --°C - --°C</div></div><div class="weather-icon-large" id="main-weather-icon">🌧️</div></div>
-<div class="weather-grid"><div class="w-item apparent"><span>🌡️ 體感溫度</span><span id="apparent-temp">--°C</span></div><div class="w-item uv"><span>☀️ 紫外線指數</span><span id="current-uv">--</span></div><div class="w-item humidity"><span>💧 相對濕度</span><span id="current-humidity">--%</span></div><div class="w-item rain"><span>☂️ 降雨概率</span><span id="rain-prob">--%</span></div></div>
-<div class="forecast-section"><div class="forecast-header"><div>未來七天天氣預測</div><div style="font-size:.8rem;color:#999">天文台自動數據</div></div><div id="forecast-container" class="forecast-container"><div class="loading-message">載入中...</div></div></div>
-<div class="calendar-section"><div class="forecast-header"><div>📅 Google 日曆行程及香港假期</div></div><div class="calendar-wrapper" id="calendar-wrapper"><div class="loading-message" style="padding:14px">載入月曆中...</div></div></div>
-</section>
-<section class="card"><div class="card-header"><div class="card-title">🚌 交通</div><div class="update-time" id="transport-update-time">更新時間 : --:--</div></div><div id="transport-container"><div class="loading-message">載入中...</div></div></section>
-</main>
+
+    <header class="top-bar">
+
+        <div class="top-bar-left">
+            <div
+                class="clock-time"
+                id="clock-time"
+            >
+                00:00:00
+            </div>
+
+            <div
+                class="clock-date"
+                id="clock-date"
+            >
+                --月--日 (-) 🌸
+            </div>
+        </div>
+
+        <div class="badge-qixi">
+            七月初七 ✨ 七夕 🌸
+        </div>
+
+    </header>
+
+    <main class="content-grid">
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <div class="card-title">
+                    ☀️ 屯門
+
+                    <span class="weather-label">
+                        🎐 天氣資訊
+                    </span>
+                </div>
+
+                <div
+                    class="update-time"
+                    id="weather-update-time"
+                >
+                    更新時間 : --:--
+                </div>
+
+            </div>
+
+            <div class="weather-main">
+
+                <div>
+                    <div
+                        class="temp-large"
+                        id="current-temp"
+                    >
+                        --°
+                    </div>
+
+                    <div
+                        class="temp-range"
+                        id="temp-range"
+                    >
+                        今日預測 : --°C - --°C
+                    </div>
+                </div>
+
+                <div
+                    class="weather-icon-large"
+                    id="main-weather-icon"
+                >
+                    🌧️
+                </div>
+
+            </div>
+
+            <div class="weather-grid">
+
+                <div class="w-item apparent">
+                    <span>🌡️ 體感溫度</span>
+                    <span id="apparent-temp">--°C</span>
+                </div>
+
+                <div class="w-item uv">
+                    <span>☀️ 紫外線指數</span>
+                    <span id="current-uv">--</span>
+                </div>
+
+                <div class="w-item humidity">
+                    <span>💧 相對濕度</span>
+                    <span id="current-humidity">--%</span>
+                </div>
+
+                <div class="w-item rain">
+                    <span>☂️ 降雨概率</span>
+                    <span id="rain-prob">--%</span>
+                </div>
+
+            </div>
+
+            <div class="forecast-section">
+
+                <div class="forecast-header">
+                    <div>
+                        未來七天天氣預測
+                    </div>
+
+                    <div style="font-size:0.8rem; color:#999;">
+                        天文台自動數據
+                    </div>
+                </div>
+
+                <div
+                    id="forecast-container"
+                    class="forecast-container"
+                >
+                    <div class="loading-message">
+                        載入中...
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="calendar-section">
+
+                <div class="forecast-header">
+                    <div>
+                        📅 Google 日曆行程及香港假期
+                    </div>
+                </div>
+
+                <div
+                    class="calendar-wrapper"
+                    id="calendar-wrapper"
+                >
+                    <div
+                        class="loading-message"
+                        style="padding:14px;"
+                    >
+                        載入月曆中...
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <div class="card-title">
+                    🚌 交通
+                </div>
+
+                <div
+                    class="update-time"
+                    id="transport-update-time"
+                >
+                    更新時間 : --:--
+                </div>
+
+            </div>
+
+            <div id="transport-container">
+                <div class="loading-message">
+                    載入中...
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
 </div>
+
 <script>
-"use strict";
-const $=id=>document.getElementById(id);const nowHM=()=>new Date().toLocaleTimeString("zh-HK",{hour:"2-digit",minute:"2-digit"});const etaClock=s=>{const d=new Date(Date.now()+s*1000);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};
-function loadCalendar(){const parts=["https://calendar.google.com/calendar/embed?height=300","&wkst=1","&ctz=Asia%2FHong_Kong","&showTitle=0","&showNav=1","&showPrint=0","&showTabs=0","&showCalendars=1","&mode=MONTH","&src=dc89b4793ace2057fecdec46d4993dd5afe36ad943d15934b7b00a099a2d63f6%40group.calendar.google.com","&color=%238E24AA","&src=46b5edaa088a96fb4cf4a2ce028f4fad9be8c6225b65add94502c53809cf63df%40group.calendar.google.com","&color=%233F51B5","&src=f438bd70999c821aadcda50f018273bbf83a40495fca259c10d826477a34eaf1%40group.calendar.google.com","&color=%230B8043","&src=zh.hong_kong%23holiday%40group.v.calendar.google.com","&color=%23D50000"];const frame=document.createElement("iframe");frame.src=parts.join("");frame.title="Google 日曆行程及香港假期";frame.loading="lazy";frame.setAttribute("frameborder","0");frame.setAttribute("scrolling","no");$("calendar-wrapper").replaceChildren(frame)}
-function updateClock(){const n=new Date(),p=x=>String(x).padStart(2,"0"),days=["日","一","二","三","四","五","六"];$(`clock-time`).textContent=`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;$(`clock-date`).textContent=`${n.getMonth()+1}月${n.getDate()}日 (${days[n.getDay()]}) 🌸`}updateClock();setInterval(updateClock,1000);
-const HKO_RHR="https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc",HKO_FND="https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc";const icons={1:"☀️",2:"🌤️",3:"⛅",4:"☁️",5:"🌥️",6:"🌧️",7:"🌩️",8:"⛈️",9:"🌫️"};let weatherLoading=false;
-async function fetchWeather(){if(weatherLoading)return;weatherLoading=true;try{const[a,b]=await Promise.all([fetch(HKO_RHR,{cache:"no-store"}),fetch(HKO_FND,{cache:"no-store"})]);if(!a.ok||!b.ok)throw Error("Weather HTTP error");const[r,f]=await Promise.all([a.json(),b.json()]),t=r.temperature.data.find(x=>x.place==="屯門")?.value??r.temperature.data[0]?.value,today=f.weatherForecast[0];$("current-temp").textContent=`${t}°`;$("apparent-temp").textContent=`${(Number(t)+2.5).toFixed(1)}°C`;$("current-humidity").textContent=`${r.humidity.data[0]?.value??"--"}%`;const uv=r.uvindex?.data?.[0];$("current-uv").textContent=`${uv?.value??"--"}${uv?.desc?" · "+uv.desc:""}`;$("temp-range").textContent=`今日預測 : ${today.forecastMintemp.value}°C - ${today.forecastMaxtemp.value}°C`;$("rain-prob").textContent=today.PSR||"低";$("main-weather-icon").textContent=icons[today.ForecastIcon]||"🌤️";$("forecast-container").innerHTML=f.weatherForecast.slice(0,7).map(x=>`<div class="forecast-day"><div class="date">${x.forecastDate.slice(6,8)}/${x.forecastDate.slice(4,6)}(${x.week.slice(2,3)})</div><div class="icon">${icons[x.ForecastIcon]||"🌤️"}</div><div class="temp">${x.forecastMintemp.value}°-${x.forecastMaxtemp.value}°</div></div>`).join("");$("weather-update-time").textContent=`更新時間 : ${nowHM()}`}catch(e){console.error(e);$("forecast-container").innerHTML='<div class="loading-message">暫時未能取得預測。</div>'}finally{weatherLoading=false}}
-const KMB="https://data.etabus.gov.hk/v1/transport/kmb",MTR_BUS="https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule",MTR_LRT="https://rt.data.gov.hk/v1/transport/mtr/lrt/getSchedule";const routes=[{type:"KMB",route:"57M",dir:"O",dest:"荔景 (北)",stopName:"業旺邨"},{type:"KMB",route:"66X",dir:"O",dest:"奧運站",stopName:"聖彼得堂"},{type:"KMB",route:"66M",dir:"O",dest:"荃灣 (如心廣場)",stopName:"聖彼得堂"},{type:"KMB",route:"258D",dir:"O",dest:"藍田站",stopName:"聖彼得堂"},{type:"MTR",route:"K53S",dest:"屯門站",stopName:"業旺邨"},{type:"LRT",route:"輕鐵",dest:"元朗",stationId:"040",stopName:"青山村"}];let transportLoading=false,stopMapPromise=null;const stopIds=JSON.parse(localStorage.getItem("dashboard_stop_ids_v5")||"{}");
-async function stopMap(){if(!stopMapPromise)stopMapPromise=fetch(`${KMB}/stop`,{cache:"force-cache"}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}).then(j=>new Map((j.data||[]).map(x=>[x.stop,x])));return stopMapPromise}
-async function kmbStopId(bus){const key=`${bus.route}_${bus.dir}_${bus.stopName}`;if(stopIds[key])return stopIds[key];const bound=bus.dir==="O"?"outbound":"inbound",[rr,map]=await Promise.all([fetch(`${KMB}/route-stop/${bus.route}/${bound}/1`,{cache:"force-cache"}),stopMap()]);if(!rr.ok)throw Error(rr.status);const rows=(await rr.json()).data||[],needle=bus.stopName.includes("業旺")?"業旺":bus.stopName.includes("聖彼得")?"聖彼得":bus.stopName,hit=rows.find(x=>(map.get(x.stop)?.name_tc||"").includes(needle));if(!hit)return null;stopIds[key]=hit.stop;localStorage.setItem("dashboard_stop_ids_v5",JSON.stringify(stopIds));return hit.stop}
-function isoClock(v){const d=new Date(v);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
-async function kmbEtas(bus){const id=await kmbStopId(bus);if(!id)return[];const r=await fetch(`${KMB}/eta/${id}/${bus.route}/1`,{cache:"no-store"});if(!r.ok)throw Error(r.status);const j=await r.json(),n=Date.now();return(j.data||[]).filter(x=>String(x.route).toUpperCase()===bus.route&&(!x.dir||x.dir===bus.dir)&&x.eta).map(x=>{const ms=new Date(x.eta).getTime()-n;if(!Number.isFinite(ms)||ms< -60000)return null;return{mins:Math.max(0,Math.floor(ms/60000)),timeStr:isoClock(x.eta)}}).filter(Boolean).sort((a,b)=>a.mins-b.mins).slice(0,3)}
-async function mtrEtas(bus){const r=await fetch(MTR_BUS,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:"zh",routeName:bus.route}),cache:"no-store"});if(!r.ok)throw Error(r.status);const j=await r.json(),items=j.busStop?.[2]?.bus||[];return items.map(x=>{const s=Number(x.arrivalTimeInSecond);return!Number.isFinite(s)||s<0||s>=108000?null:{mins:Math.max(0,Math.floor(s/60)),timeStr:etaClock(s)}}).filter(Boolean).sort((a,b)=>a.mins-b.mins).slice(0,3)}
-async function lrtEtas(bus){const r=await fetch(`${MTR_LRT}?station_id=${bus.stationId}`,{cache:"no-store"});if(!r.ok)throw Error(r.status);const j=await r.json(),out=[];(j.platform_list||[]).forEach(p=>(p.route_list||[]).forEach(x=>{if(!x.dest_ch?.includes(bus.dest))return;const text=x.time_ch||"";let mins=text.includes("分鐘")?parseInt(text,10):/(即將|正在)/.test(text)?0:null;if(!Number.isFinite(mins))return;out.push({routeNo:x.route_no,mins,minsText:mins===0?"即將到站":text,timeStr:etaClock(mins*60)})}));return out.sort((a,b)=>a.mins-b.mins).slice(0,3)}
-function card(bus,etas){let route=bus.route,cls="bus-route-box",main='<span style="font-size:1.05rem;color:#999">暫時未能讀取</span>',sub='<span>沒有後續班次 (或非服務時間)</span>';if(bus.type==="LRT")cls+=" lrt-box";if(etas.length){const f=etas[0];if(bus.type==="LRT"){route=`輕鐵 ${f.routeNo}`;main=`${f.minsText} <span class="eta-time-tag">${f.timeStr}</span>`;if(etas.length>1)sub=etas.slice(1).map(x=>`<div class="sub-pill">${x.routeNo}線: ${x.minsText} (${x.timeStr})</div>`).join("")}else{main=`${f.mins===0?"即將":f.mins+" 分鐘"} <span class="eta-time-tag">${f.timeStr}</span>`;if(etas.length>1)sub=etas.slice(1).map(x=>`<div class="sub-pill">${x.mins}分 (${x.timeStr})</div>`).join("")}}const d=document.createElement("div");d.className="bus-card";d.innerHTML=`<div class="bus-main"><div class="${cls}">${route}</div><div class="bus-info"><div class="bus-dest">往 ${bus.dest}</div><div class="bus-stop">📍 ${bus.stopName}</div></div><div class="bus-eta-group"><div class="bus-eta-main">${main}</div></div></div><div class="bus-sub"><span>後續班次：</span>${sub}</div>`;return d}
-async function fetchTransport(){if(transportLoading)return;transportLoading=true;try{const results=await Promise.all(routes.map(async bus=>{try{return{bus,etas:bus.type==="KMB"?await kmbEtas(bus):bus.type==="MTR"?await mtrEtas(bus):await lrtEtas(bus)}}catch(e){console.error(bus.route,e);return{bus,etas:[]}}})),frag=document.createDocumentFragment();results.forEach(x=>frag.appendChild(card(x.bus,x.etas)));$("transport-container").replaceChildren(frag);$("transport-update-time").textContent=`更新時間 : ${nowHM()}`}finally{transportLoading=false}}
-let wt,tt;function start(){if(!wt)wt=setInterval(fetchWeather,60000);if(!tt)tt=setInterval(fetchTransport,30000)}function stop(){clearInterval(wt);clearInterval(tt);wt=tt=null}document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){fetchWeather();fetchTransport();start()}else stop()});window.addEventListener("orientationchange",()=>setTimeout(()=>scrollTo(0,0),250));loadCalendar();fetchWeather();fetchTransport();start();
+    "use strict";
+
+    const getElement = function (id) {
+        return document.getElementById(id);
+    };
+
+    function getCurrentTimeText() {
+        return new Date().toLocaleTimeString(
+            "zh-HK",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+    }
+
+    function getEtaClockTime(seconds) {
+        const etaDate = new Date(
+            Date.now() + seconds * 1000
+        );
+
+        return (
+            String(
+                etaDate.getHours()
+            ).padStart(2, "0") +
+            ":" +
+            String(
+                etaDate.getMinutes()
+            ).padStart(2, "0")
+        );
+    }
+
+    /* 建立 Google Calendar */
+
+    function loadCalendar() {
+        const calendarParts = [
+            "https://calendar.google.com/calendar/embed?height=300",
+            "&wkst=1",
+            "&ctz=Asia%2FHong_Kong",
+            "&showTitle=0",
+            "&showNav=1",
+            "&showPrint=0",
+            "&showTabs=0",
+            "&showCalendars=1",
+            "&mode=MONTH",
+
+            "&src=dc89b4793ace2057fecdec46d4993dd5afe36ad943d15934b7b00a099a2d63f6%40group.calendar.google.com",
+            "&color=%238E24AA",
+
+            "&src=46b5edaa088a96fb4cf4a2ce028f4fad9be8c6225b65add94502c53809cf63df%40group.calendar.google.com",
+            "&color=%233F51B5",
+
+            "&src=f438bd70999c821aadcda50f018273bbf83a40495fca259c10d826477a34eaf1%40group.calendar.google.com",
+            "&color=%230B8043",
+
+            "&src=zh.hong_kong%23holiday%40group.v.calendar.google.com",
+            "&color=%23D50000"
+        ];
+
+        const calendarFrame =
+            document.createElement("iframe");
+
+        calendarFrame.src =
+            calendarParts.join("");
+
+        calendarFrame.title =
+            "Google 日曆行程及香港假期";
+
+        calendarFrame.loading =
+            "lazy";
+
+        calendarFrame.setAttribute(
+            "frameborder",
+            "0"
+        );
+
+        calendarFrame.setAttribute(
+            "scrolling",
+            "no"
+        );
+
+        getElement(
+            "calendar-wrapper"
+        ).replaceChildren(
+            calendarFrame
+        );
+    }
+
+    /* 時鐘及日期 */
+
+    function updateClock() {
+        const now = new Date();
+
+        const hh =
+            String(
+                now.getHours()
+            ).padStart(2, "0");
+
+        const mm =
+            String(
+                now.getMinutes()
+            ).padStart(2, "0");
+
+        const ss =
+            String(
+                now.getSeconds()
+            ).padStart(2, "0");
+
+        const days = [
+            "日",
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六"
+        ];
+
+        getElement(
+            "clock-time"
+        ).textContent =
+            `${hh}:${mm}:${ss}`;
+
+        getElement(
+            "clock-date"
+        ).textContent =
+            `${now.getMonth() + 1}月` +
+            `${now.getDate()}日 ` +
+            `(${days[now.getDay()]}) 🌸`;
+    }
+
+    updateClock();
+
+    setInterval(
+        updateClock,
+        1000
+    );
+
+    /* 天氣 */
+
+    const HKO_RHRREAD =
+        "https://data.weather.gov.hk/" +
+        "weatherAPI/opendata/weather.php" +
+        "?dataType=rhrread&lang=tc";
+
+    const HKO_FND =
+        "https://data.weather.gov.hk/" +
+        "weatherAPI/opendata/weather.php" +
+        "?dataType=fnd&lang=tc";
+
+    const weatherIcons = {
+        1: "☀️",
+        2: "🌤️",
+        3: "⛅",
+        4: "☁️",
+        5: "🌥️",
+        6: "🌧️",
+        7: "🌩️",
+        8: "⛈️",
+        9: "🌫️"
+    };
+
+    let weatherIsLoading = false;
+
+    function getWeatherIcon(iconCode) {
+        return weatherIcons[iconCode] || "🌤️";
+    }
+
+    async function fetchWeather() {
+        if (weatherIsLoading) {
+            return;
+        }
+
+        weatherIsLoading = true;
+
+        try {
+            const responses =
+                await Promise.all([
+                    fetch(
+                        HKO_RHRREAD,
+                        {
+                            cache: "no-store"
+                        }
+                    ),
+                    fetch(
+                        HKO_FND,
+                        {
+                            cache: "no-store"
+                        }
+                    )
+                ]);
+
+            if (
+                !responses[0].ok ||
+                !responses[1].ok
+            ) {
+                throw new Error(
+                    "天氣 API HTTP 錯誤"
+                );
+            }
+
+            const values =
+                await Promise.all([
+                    responses[0].json(),
+                    responses[1].json()
+                ]);
+
+            const dataRhr =
+                values[0];
+
+            const dataFnd =
+                values[1];
+
+            const tmTemp =
+                dataRhr.temperature.data.find(
+                    function (item) {
+                        return item.place === "屯門";
+                    }
+                )?.value ??
+                dataRhr.temperature.data[0]?.value;
+
+            getElement(
+                "current-temp"
+            ).textContent =
+                `${tmTemp}°`;
+
+            getElement(
+                "apparent-temp"
+            ).textContent =
+                `${(Number(tmTemp) + 2.5).toFixed(1)}°C`;
+
+            getElement(
+                "current-humidity"
+            ).textContent =
+                `${dataRhr.humidity.data[0]?.value ?? "--"}%`;
+
+            const uv =
+                dataRhr.uvindex?.data?.[0];
+
+            getElement(
+                "current-uv"
+            ).textContent =
+                `${uv?.value ?? "--"}` +
+                `${uv?.desc ? " · " + uv.desc : ""}`;
+
+            const today =
+                dataFnd.weatherForecast[0];
+
+            getElement(
+                "temp-range"
+            ).textContent =
+                `今日預測 : ` +
+                `${today.forecastMintemp.value}°C - ` +
+                `${today.forecastMaxtemp.value}°C`;
+
+            getElement(
+                "rain-prob"
+            ).textContent =
+                today.PSR || "低";
+
+            getElement(
+                "main-weather-icon"
+            ).textContent =
+                getWeatherIcon(
+                    today.ForecastIcon
+                );
+
+            const forecastHTML =
+                dataFnd.weatherForecast
+                    .slice(0, 7)
+                    .map(function (day) {
+                        const dateText =
+                            day.forecastDate.substring(6, 8) +
+                            "/" +
+                            day.forecastDate.substring(4, 6);
+
+                        const weekText =
+                            day.week.substring(2, 3);
+
+                        return `
+                            <div class="forecast-day">
+                                <div class="date">
+                                    ${dateText}(${weekText})
+                                </div>
+
+                                <div class="icon">
+                                    ${getWeatherIcon(day.ForecastIcon)}
+                                </div>
+
+                                <div class="temp">
+                                    ${day.forecastMintemp.value}°-${day.forecastMaxtemp.value}°
+                                </div>
+                            </div>
+                        `;
+                    })
+                    .join("");
+
+            getElement(
+                "forecast-container"
+            ).innerHTML =
+                forecastHTML;
+
+            getElement(
+                "weather-update-time"
+            ).textContent =
+                `更新時間 : ${getCurrentTimeText()}`;
+
+        } catch (error) {
+            console.error(
+                "天氣獲取失敗",
+                error
+            );
+
+            getElement(
+                "forecast-container"
+            ).innerHTML =
+                `<div class="loading-message">` +
+                `暫時未能取得預測。` +
+                `</div>`;
+
+        } finally {
+            weatherIsLoading = false;
+        }
+    }
+
+    /* 交通 */
+
+    const KMB_BASE =
+        "https://data.etabus.gov.hk/" +
+        "v1/transport/kmb";
+
+    const MTR_BUS_BASE =
+        "https://rt.data.gov.hk/" +
+        "v1/transport/mtr/bus/getSchedule";
+
+    const MTR_LRT_BASE =
+        "https://rt.data.gov.hk/" +
+        "v1/transport/mtr/lrt/getSchedule";
+
+    const busRoutes = [
+        {
+            type: "KMB",
+            route: "57M",
+            dir: "O",
+            dest: "荔景 (北)",
+            stopName: "業旺邨"
+        },
+        {
+            type: "KMB",
+            route: "66X",
+            dir: "O",
+            dest: "奧運站",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "KMB",
+            route: "66M",
+            dir: "O",
+            dest: "荃灣 (如心廣場)",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "KMB",
+            route: "258D",
+            dir: "O",
+            dest: "藍田站",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "MTR",
+            route: "K53S",
+            dest: "屯門站",
+            stopName: "業旺邨"
+        },
+        {
+            type: "LRT",
+            route: "輕鐵",
+            dest: "元朗",
+            stationId: "040",
+            stopName: "青山村"
+        }
+    ];
+
+    let transportIsLoading = false;
+    let kmbStopMapPromise = null;
+
+    const KMB_CACHE_KEY =
+        "dashboard_stop_ids_v6";
+
+    function readStopCache() {
+        try {
+            return JSON.parse(
+                localStorage.getItem(
+                    KMB_CACHE_KEY
+                ) || "{}"
+            );
+        } catch (error) {
+            return {};
+        }
+    }
+
+    function saveStopCache(cache) {
+        try {
+            localStorage.setItem(
+                KMB_CACHE_KEY,
+                JSON.stringify(cache)
+            );
+        } catch (error) {
+            console.warn(
+                "未能儲存站點快取",
+                error
+            );
+        }
+    }
+
+    const stopIdCache =
+        readStopCache();
+
+    async function getKmbStopMap() {
+        if (kmbStopMapPromise) {
+            return kmbStopMapPromise;
+        }
+
+        kmbStopMapPromise =
+            fetch(
+                `${KMB_BASE}/stop`,
+                {
+                    cache: "force-cache"
+                }
+            )
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error(
+                        `KMB Stop HTTP ${response.status}`
+                    );
+                }
+
+                return response.json();
+            })
+            .then(function (data) {
+                const map = new Map();
+
+                (data.data || []).forEach(
+                    function (item) {
+                        map.set(
+                            item.stop,
+                            item
+                        );
+                    }
+                );
+
+                return map;
+            })
+            .catch(function (error) {
+                kmbStopMapPromise = null;
+                throw error;
+            });
+
+        return kmbStopMapPromise;
+    }
+
+    async function getKmbStopId(bus) {
+        const cacheKey =
+            `${bus.route}_${bus.dir}_${bus.stopName}`;
+
+        if (stopIdCache[cacheKey]) {
+            return stopIdCache[cacheKey];
+        }
+
+        const apiDirection =
+            bus.dir === "O"
+                ? "outbound"
+                : "inbound";
+
+        const values =
+            await Promise.all([
+                fetch(
+                    `${KMB_BASE}/route-stop/` +
+                    `${encodeURIComponent(bus.route)}/` +
+                    `${apiDirection}/1`,
+                    {
+                        cache: "force-cache"
+                    }
+                ),
+                getKmbStopMap()
+            ]);
+
+        const routeResponse =
+            values[0];
+
+        const stopMap =
+            values[1];
+
+        if (!routeResponse.ok) {
+            throw new Error(
+                `KMB Route Stop HTTP ${routeResponse.status}`
+            );
+        }
+
+        const routeData =
+            await routeResponse.json();
+
+        let matchText =
+            bus.stopName;
+
+        if (
+            bus.stopName.includes("業旺")
+        ) {
+            matchText = "業旺";
+        } else if (
+            bus.stopName.includes("聖彼得")
+        ) {
+            matchText = "聖彼得";
+        }
+
+        const matched =
+            (routeData.data || [])
+                .find(function (item) {
+                    const stop =
+                        stopMap.get(
+                            item.stop
+                        );
+
+                    return (
+                        stop?.name_tc || ""
+                    ).includes(matchText);
+                });
+
+        if (!matched?.stop) {
+            return null;
+        }
+
+        stopIdCache[cacheKey] =
+            matched.stop;
+
+        saveStopCache(
+            stopIdCache
+        );
+
+        return matched.stop;
+    }
+
+    function formatEtaTime(etaValue) {
+        const etaDate =
+            new Date(etaValue);
+
+        if (
+            Number.isNaN(
+                etaDate.getTime()
+            )
+        ) {
+            return "";
+        }
+
+        return (
+            String(
+                etaDate.getHours()
+            ).padStart(2, "0") +
+            ":" +
+            String(
+                etaDate.getMinutes()
+            ).padStart(2, "0")
+        );
+    }
+
+    async function fetchKmbEtas(bus) {
+        const stopId =
+            await getKmbStopId(bus);
+
+        if (!stopId) {
+            return [];
+        }
+
+        const response =
+            await fetch(
+                `${KMB_BASE}/eta/` +
+                `${encodeURIComponent(stopId)}/` +
+                `${encodeURIComponent(bus.route)}/1`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `KMB ETA HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        const now =
+            Date.now();
+
+        return (data.data || [])
+            .filter(function (item) {
+                const sameRoute =
+                    String(
+                        item.route || ""
+                    ).toUpperCase() ===
+                    bus.route.toUpperCase();
+
+                const sameDirection =
+                    !item.dir ||
+                    item.dir === bus.dir;
+
+                return (
+                    sameRoute &&
+                    sameDirection &&
+                    item.eta
+                );
+            })
+            .map(function (item) {
+                const etaTimestamp =
+                    new Date(
+                        item.eta
+                    ).getTime();
+
+                if (
+                    !Number.isFinite(
+                        etaTimestamp
+                    )
+                ) {
+                    return null;
+                }
+
+                const difference =
+                    etaTimestamp - now;
+
+                if (
+                    difference < -60000
+                ) {
+                    return null;
+                }
+
+                return {
+                    mins: Math.max(
+                        0,
+                        Math.floor(
+                            difference / 60000
+                        )
+                    ),
+
+                    timeStr:
+                        formatEtaTime(
+                            item.eta
+                        )
+                };
+            })
+            .filter(Boolean)
+            .sort(function (a, b) {
+                return a.mins - b.mins;
+            })
+            .slice(0, 3);
+    }
+
+    async function fetchMtrBusEtas(bus) {
+        const response =
+            await fetch(
+                MTR_BUS_BASE,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        language: "zh",
+                        routeName: bus.route
+                    }),
+
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `MTR Bus HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        const targetStop =
+            data.busStop?.[2];
+
+        if (
+            !Array.isArray(
+                targetStop?.bus
+            )
+        ) {
+            return [];
+        }
+
+        return targetStop.bus
+            .map(function (item) {
+                const seconds =
+                    Number(
+                        item.arrivalTimeInSecond
+                    );
+
+                if (
+                    !Number.isFinite(seconds) ||
+                    seconds < 0 ||
+                    seconds >= 108000
+                ) {
+                    return null;
+                }
+
+                return {
+                    mins: Math.max(
+                        0,
+                        Math.floor(
+                            seconds / 60
+                        )
+                    ),
+
+                    timeStr:
+                        getEtaClockTime(
+                            seconds
+                        )
+                };
+            })
+            .filter(Boolean)
+            .sort(function (a, b) {
+                return a.mins - b.mins;
+            })
+            .slice(0, 3);
+    }
+
+    async function fetchLrtEtas(bus) {
+        const response =
+            await fetch(
+                `${MTR_LRT_BASE}` +
+                `?station_id=` +
+                `${encodeURIComponent(bus.stationId)}`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `LRT HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        const results = [];
+
+        (data.platform_list || [])
+            .forEach(function (platform) {
+                (platform.route_list || [])
+                    .forEach(function (routeInfo) {
+                        if (
+                            !routeInfo.dest_ch?.includes(
+                                bus.dest
+                            )
+                        ) {
+                            return;
+                        }
+
+                        const timeText =
+                            routeInfo.time_ch || "";
+
+                        let mins = null;
+                        let minsText = timeText;
+
+                        if (
+                            timeText.includes("分鐘")
+                        ) {
+                            mins =
+                                parseInt(
+                                    timeText,
+                                    10
+                                );
+                        } else if (
+                            timeText.includes("即將") ||
+                            timeText.includes("正在")
+                        ) {
+                            mins = 0;
+                            minsText =
+                                "即將到站";
+                        }
+
+                        if (
+                            !Number.isFinite(mins)
+                        ) {
+                            return;
+                        }
+
+                        results.push({
+                            routeNo:
+                                routeInfo.route_no,
+
+                            mins,
+
+                            minsText,
+
+                            timeStr:
+                                getEtaClockTime(
+                                    mins * 60
+                                )
+                        });
+                    });
+            });
+
+        return results
+            .sort(function (a, b) {
+                return a.mins - b.mins;
+            })
+            .slice(0, 3);
+    }
+
+    function createTransportCard(
+        bus,
+        etas
+    ) {
+        let displayRoute =
+            bus.route;
+
+        let routeClass =
+            "bus-route-box";
+
+        let mainHTML =
+            `<span style="` +
+            `font-size:1.05rem;` +
+            `color:#999;` +
+            `">` +
+            `暫時未能讀取` +
+            `</span>`;
+
+        let subHTML =
+            `<span>` +
+            `沒有後續班次 ` +
+            `(或非服務時間)` +
+            `</span>`;
+
+        if (
+            bus.type === "LRT"
+        ) {
+            routeClass +=
+                " lrt-box";
+        }
+
+        if (etas.length > 0) {
+            const first =
+                etas[0];
+
+            if (
+                bus.type === "LRT"
+            ) {
+                displayRoute =
+                    `輕鐵 ${first.routeNo}`;
+
+                mainHTML =
+                    `${first.minsText} ` +
+                    `<span class="eta-time-tag">` +
+                    `${first.timeStr}` +
+                    `</span>`;
+
+                if (
+                    etas.length > 1
+                ) {
+                    subHTML =
+                        etas
+                            .slice(1)
+                            .map(function (item) {
+                                return (
+                                    `<div class="sub-pill">` +
+                                    `${item.routeNo}線: ` +
+                                    `${item.minsText} ` +
+                                    `(${item.timeStr})` +
+                                    `</div>`
+                                );
+                            })
+                            .join("");
+                }
+            } else {
+                const firstText =
+                    first.mins === 0
+                        ? "即將"
+                        : `${first.mins} 分鐘`;
+
+                mainHTML =
+                    `${firstText} ` +
+                    `<span class="eta-time-tag">` +
+                    `${first.timeStr}` +
+                    `</span>`;
+
+                if (
+                    etas.length > 1
+                ) {
+                    subHTML =
+                        etas
+                            .slice(1)
+                            .map(function (item) {
+                                return (
+                                    `<div class="sub-pill">` +
+                                    `${item.mins}分 ` +
+                                    `(${item.timeStr})` +
+                                    `</div>`
+                                );
+                            })
+                            .join("");
+                }
+            }
+        }
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+        card.className =
+            "bus-card";
+
+        card.innerHTML = `
+            <div class="bus-main">
+
+                <div class="${routeClass}">
+                    ${displayRoute}
+                </div>
+
+                <div class="bus-info">
+
+                    <div class="bus-dest">
+                        往 ${bus.dest}
+                    </div>
+
+                    <div class="bus-stop">
+                        📍 ${bus.stopName}
+                    </div>
+
+                </div>
+
+                <div class="bus-eta-group">
+
+                    <div class="bus-eta-main">
+                        ${mainHTML}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="bus-sub">
+                <span>後續班次：</span>
+                ${subHTML}
+            </div>
+        `;
+
+        return card;
+    }
+
+    async function fetchTransport() {
+        if (transportIsLoading) {
+            return;
+        }
+
+        transportIsLoading = true;
+
+        const container =
+            getElement(
+                "transport-container"
+            );
+
+        try {
+            const results =
+                await Promise.all(
+                    busRoutes.map(
+                        async function (bus) {
+                            try {
+                                let etas = [];
+
+                                if (
+                                    bus.type === "KMB"
+                                ) {
+                                    etas =
+                                        await fetchKmbEtas(
+                                            bus
+                                        );
+                                } else if (
+                                    bus.type === "MTR"
+                                ) {
+                                    etas =
+                                        await fetchMtrBusEtas(
+                                            bus
+                                        );
+                                } else {
+                                    etas =
+                                        await fetchLrtEtas(
+                                            bus
+                                        );
+                                }
+
+                                return {
+                                    bus,
+                                    etas
+                                };
+
+                            } catch (error) {
+                                console.error(
+                                    `${bus.route} 更新失敗`,
+                                    error
+                                );
+
+                                return {
+                                    bus,
+                                    etas: []
+                                };
+                            }
+                        }
+                    )
+                );
+
+            const fragment =
+                document.createDocumentFragment();
+
+            results.forEach(
+                function (result) {
+                    fragment.appendChild(
+                        createTransportCard(
+                            result.bus,
+                            result.etas
+                        )
+                    );
+                }
+            );
+
+            container.replaceChildren(
+                fragment
+            );
+
+            getElement(
+                "transport-update-time"
+            ).textContent =
+                `更新時間 : ${getCurrentTimeText()}`;
+
+        } catch (error) {
+            console.error(
+                "交通獲取失敗",
+                error
+            );
+
+            container.innerHTML =
+                `<div class="loading-message">` +
+                `暫時未能取得交通資料。` +
+                `</div>`;
+
+        } finally {
+            transportIsLoading = false;
+        }
+    }
+
+    /* 更新排程 */
+
+    let weatherTimer = null;
+    let transportTimer = null;
+
+    function startTimers() {
+        if (!weatherTimer) {
+            weatherTimer =
+                setInterval(
+                    fetchWeather,
+                    60000
+                );
+        }
+
+        if (!transportTimer) {
+            transportTimer =
+                setInterval(
+                    fetchTransport,
+                    30000
+                );
+        }
+    }
+
+    function stopTimers() {
+        if (weatherTimer) {
+            clearInterval(
+                weatherTimer
+            );
+
+            weatherTimer = null;
+        }
+
+        if (transportTimer) {
+            clearInterval(
+                transportTimer
+            );
+
+            transportTimer = null;
+        }
+    }
+
+    document.addEventListener(
+        "visibilitychange",
+        function () {
+            if (
+                document.visibilityState ===
+                "visible"
+            ) {
+                fetchWeather();
+                fetchTransport();
+                startTimers();
+            } else {
+                stopTimers();
+            }
+        }
+    );
+
+    window.addEventListener(
+        "orientationchange",
+        function () {
+            setTimeout(
+                function () {
+                    window.scrollTo(
+                        0,
+                        0
+                    );
+                },
+                250
+            );
+        }
+    );
+
+    /* 啟動 */
+
+    loadCalendar();
+    fetchWeather();
+    fetchTransport();
+    startTimers();
 </script>
+
 </body>
 </html>
