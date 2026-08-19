@@ -225,6 +225,11 @@
             margin-right: 15px;
             white-space: nowrap;
         }
+        /* 輕鐵專用顏色 */
+        .bus-route-box.lrt-box {
+            background-color: #f39c12; 
+        }
+        
         .bus-info {
             flex-grow: 1;
         }
@@ -344,7 +349,7 @@
                 </div>
             </div>
 
-            <!-- Google Calendar 區塊 (已整合 4 個自訂日曆) -->
+            <!-- Google Calendar 區塊 -->
             <div class="calendar-section">
                 <div class="forecast-header" style="margin-bottom: 10px;">
                     <div>📅 Google 日曆行程</div>
@@ -437,16 +442,19 @@
         }
     }
 
-    // --- 3. 交通 API 邏輯 (包含九巴與港鐵巴士 K53S，車站：業旺邨) ---
+    // --- 3. 交通 API 邏輯 (包含九巴、港鐵巴士、及輕鐵) ---
     const KMB_BASE = "https://data.etabus.gov.hk/v1/transport/kmb";
     const MTR_BUS_BASE = "https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule";
+    const MTR_LRT_BASE = "https://rt.data.gov.hk/v1/transport/mtr/lrt/getSchedule";
 
     const busRoutes = [
         { type: "KMB", route: "57M", dir: "O", dest: "荔景 (北)", stopName: "業旺邨" },
         { type: "KMB", route: "66X", dir: "O", dest: "奧運站", stopName: "聖彼得堂" },
         { type: "KMB", route: "66M", dir: "O", dest: "荃灣 (如心廣場)", stopName: "聖彼得堂" },
         { type: "KMB", route: "258D", dir: "O", dest: "藍田站", stopName: "聖彼得堂" },
-        { type: "MTR", route: "K53S", dest: "屯門站", stopName: "業旺邨" }
+        { type: "MTR", route: "K53S", dest: "屯門站", stopName: "業旺邨" },
+        // 新增輕鐵：指定 stationId 為 330 (景峰站，最靠近聖彼德堂)
+        { type: "LRT", route: "輕鐵", dest: "元朗", stationId: "330", stopName: "景峰 (鄰近聖彼德堂)" }
     ];
 
     async function getKmbStopId(route, dir, targetName) {
@@ -474,9 +482,12 @@
             const container = document.getElementById('transport-container');
             container.innerHTML = '';
             
-            for (const bus of busRoutes) {
+            for (let bus of busRoutes) {
+                // 為了不影響原始設定，複製一份物件供畫面修改
+                let displayBus = { ...bus };
                 let mainEtaHTML = `<span style="font-size:1.3rem; color:#999;">暫時未能讀取</span>`;
-                let subEtaHTML = `<span style="font-size:0.9rem;">沒有後續班次</span>`;
+                let subEtaHTML = `<span style="font-size:0.9rem;">沒有後續班次 (或非服務時間)</span>`;
+                let routeBoxClass = "bus-route-box"; 
 
                 if (bus.type === "KMB") {
                     const stopId = await getKmbStopId(bus.route, bus.dir, bus.stopName);
@@ -505,36 +516,24 @@
                         }
                     }
                 } else if (bus.type === "MTR") {
-                    // --- 修改部分：港鐵巴士 API 抓取邏輯 ---
                     try {
-                        // 港鐵巴士 API 要求使用 POST，並在 body 帶上 language: "zh"
                         const res = await fetch(MTR_BUS_BASE, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ language: 'zh' })
                         });
                         const data = await res.json();
                         
                         if (data && data.busStop) {
-                            // 比對站名 (例如 "業旺邨")
                             const targetStop = data.busStop.find(s => s.busStopName && s.busStopName.includes(bus.stopName));
-                            
                             if (targetStop && targetStop.routeList) {
-                                // 比對路線 (例如 "K53S")
                                 const rInfo = targetStop.routeList.find(r => r.routeName === bus.route);
-                                
                                 if (rInfo && rInfo.busLocation && rInfo.busLocation.length > 0) {
-                                    // MTR API 給的是秒數倒數 (arrivalTimeInSecond)
                                     const mtrEtas = rInfo.busLocation.map(t => {
                                         const diffInSeconds = parseInt(t.arrivalTimeInSecond);
                                         const mins = Math.max(0, Math.floor(diffInSeconds / 60));
-                                        
-                                        // 計算絕對時間 HH:mm
                                         const etaDate = new Date(Date.now() + diffInSeconds * 1000);
                                         const timeStr = `${String(etaDate.getHours()).padStart(2, '0')}:${String(etaDate.getMinutes()).padStart(2, '0')}`;
-                                        
                                         return { mins, timeStr };
                                     }).filter(t => !isNaN(t.mins)).sort((a, b) => a.mins - b.mins);
 
@@ -542,7 +541,6 @@
                                         const first = mtrEtas[0];
                                         const firstMinText = first.mins === 0 ? "即將" : `${first.mins} 分鐘`;
                                         mainEtaHTML = `${firstMinText} <span class="eta-time-tag">${first.timeStr}</span>`;
-                                        
                                         if (mtrEtas.length > 1) {
                                             subEtaHTML = mtrEtas.slice(1).map(e => `<div class="sub-pill">${e.mins}分 (${e.timeStr})</div>`).join("");
                                         }
@@ -553,17 +551,71 @@
                     } catch (err) {
                         console.error("MTR Bus API error", err);
                     }
-                    // --- 修改部分結束 ---
+                } else if (bus.type === "LRT") {
+                    // --- 新增：輕鐵 API 抓取邏輯 ---
+                    routeBoxClass += " lrt-box"; // 幫輕鐵換個顏色標籤
+                    try {
+                        const res = await fetch(`${MTR_LRT_BASE}?station_id=${bus.stationId}`);
+                        const data = await res.json();
+                        
+                        if (data && data.status === 1 && data.platform_list) {
+                            let lrtEtas = [];
+                            data.platform_list.forEach(plat => {
+                                if (plat.route_list) {
+                                    plat.route_list.forEach(r => {
+                                        // 只篩選前往指定目的地（元朗）的列車
+                                        if (r.dest_ch && r.dest_ch.includes(bus.dest)) {
+                                            let minsText = r.time_ch;
+                                            let timeStr = "";
+                                            let mins = 999;
+                                            
+                                            // 解析中文時間格式
+                                            if (minsText.includes("分鐘")) {
+                                                mins = parseInt(minsText);
+                                                const etaDate = new Date(Date.now() + mins * 60000);
+                                                timeStr = `${String(etaDate.getHours()).padStart(2, '0')}:${String(etaDate.getMinutes()).padStart(2, '0')}`;
+                                            } else if (minsText.includes("即將") || minsText.includes("正在")) {
+                                                mins = 0;
+                                                minsText = "即將到站";
+                                                const etaDate = new Date();
+                                                timeStr = `${String(etaDate.getHours()).padStart(2, '0')}:${String(etaDate.getMinutes()).padStart(2, '0')}`;
+                                            } else {
+                                                return; // 其他狀態如「已離開」則跳過
+                                            }
+                                            
+                                            lrtEtas.push({ routeNo: r.route_no, minsText, timeStr, mins });
+                                        }
+                                    });
+                                }
+                            });
+                            
+                            // 依照時間遠近排序
+                            lrtEtas.sort((a, b) => a.mins - b.mins);
+                            
+                            if (lrtEtas.length > 0) {
+                                const first = lrtEtas[0];
+                                displayBus.route = `輕鐵 ${first.routeNo}`; // 動態顯示即將到站的輕鐵號碼
+                                mainEtaHTML = `${first.minsText} <span class="eta-time-tag">${first.timeStr}</span>`;
+                                
+                                if (lrtEtas.length > 1) {
+                                    subEtaHTML = lrtEtas.slice(1).map(e => `<div class="sub-pill">${e.routeNo}線: ${e.minsText} (${e.timeStr})</div>`).join("");
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error("MTR LRT API error", err);
+                    }
                 }
                 
+                // 渲染交通卡片
                 const card = document.createElement('div');
                 card.className = 'bus-card';
                 card.innerHTML = `
                     <div class="bus-main">
-                        <div class="bus-route-box">${bus.route}</div>
+                        <div class="${routeBoxClass}">${displayBus.route}</div>
                         <div class="bus-info">
-                            <div class="bus-dest">往 ${bus.dest}</div>
-                            <div class="bus-stop">📍 ${bus.stopName}</div>
+                            <div class="bus-dest">往 ${displayBus.dest}</div>
+                            <div class="bus-stop">📍 ${displayBus.stopName}</div>
                         </div>
                         <div class="bus-eta-group">
                             <div class="bus-eta-main">${mainEtaHTML}</div>
