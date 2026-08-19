@@ -1,513 +1,587 @@
-<!DOCTYPE html>
-<html lang="zh-HK">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>屯門區智能 Dashboard</title>
-    <style>
-        body {
-            background-color: #fff9f5;
-            background-image: radial-gradient(#ffd1dc 1px, transparent 1px);
-            background-size: 20px 20px;
-            margin: 0;
-            padding: 20px 30px;
-            font-family: 'PingFang HK', 'Helvetica Neue', sans-serif;
-            color: #333;
-            box-sizing: border-box;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <title>即時天氣與業旺邨交通</title>
+  <!-- 引入農曆與假期計算庫 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.7/lunar.js"></script>
+  
+<style>
+:root{
+  --bg:#fff8ef;
+  --paper:#ffffff;
+  --ink:#28333a;
+  --muted:#76818a;
+  --teal:#08a7a3;
+  --teal-dark:#078d8a;
+  --mint:#dff7f2;
+  --pink:#ffd8e8;
+  --pink-strong:#f783ad;
+  --yellow:#fff0c7;
+  --orange:#f3b21a;
+  --line:#f2dfe1;
+  --shadow:0 5px 0 rgba(247,205,211,.24), 0 12px 28px rgba(88,67,63,.08);
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;padding:0;min-height:100%;
+  background:
+    radial-gradient(circle at 8px 8px, rgba(247,144,177,.16) 1.2px, transparent 1.4px) 0 0/20px 20px,
+    var(--bg);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+}
+body{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.app{max-width:1450px;margin:0 auto}
+.topbar{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;
+  background:rgba(255,255,255,.88);border:2px solid #f1cfd5;border-radius:18px;
+  padding:10px 12px;margin-bottom:10px;box-shadow:var(--shadow)
+}
+.clock{
+  font-size:clamp(42px,6vw,68px);line-height:.92;font-weight:900;letter-spacing:.02em;color:var(--teal)
+}
+.date-wrap{display:flex;align-items:center;gap:7px}
+.date{font-size:clamp(18px,2.2vw,28px);font-weight:900;color:var(--pink-strong)}
+.flower{font-size:22px}
+.right-tools{display:flex;align-items:center;gap:8px}
+.small-time{
+  background:#f6f2ec;border-radius:12px;padding:5px 8px;line-height:1.05;font-size:11px;font-weight:800;text-align:center;color:#59636b
+}
+.refresh{
+  border:0;border-radius:13px;padding:11px 15px;
+  background:#f4a400;color:white;font-size:15px;font-weight:900;cursor:pointer
+}
 
-        /* 頂部時間列 */
-        .top-bar {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 8px 25px;
-            border-radius: 20px;
-            border: 2px dashed #ffb6c1;
-        }
-        .time-group {
-            display: flex;
-            align-items: baseline;
-        }
-        #time-container {
-            font-size: 70px;
-            font-weight: 900;
-            color: #008b8b;
-            letter-spacing: 2px;
-            margin-right: 20px;
-        }
-        #date-container {
-            font-size: 28px;
-            color: #ff8b94;
-            font-weight: bold;
-        }
-        #lunar-container {
-            font-size: 22px;
-            color: #db7093;
-            background: #ffe4e1;
-            padding: 5px 15px;
-            border-radius: 12px;
-            font-weight: bold;
-        }
+/* 天氣警告標籤 */
+.warnings-container {
+  display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 6px; 
+  padding: 0 4px; margin-top: -3px; margin-bottom: 9px; min-height: 0;
+}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:900}
+.badge.warn{background:#fff0cb;color:#9a6300;border:1px solid #f4d394}
+.badge.danger{background:#ffe0e0;color:#a52525;border:1px solid #efb5b5}
+.badge.info{background:#e5f0ff;color:#2d648c;border:1px solid #c3d8ef}
 
-        /* 主內容區雙欄設計 */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1.1fr;
-            gap: 25px;
-            flex-grow: 1;
-            overflow: hidden;
-        }
+/* 核心版面：橫向左右並排，直向上下疊放 */
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+@media (orientation: portrait){
+  .columns{grid-template-columns:1fr}
+}
 
-        .card {
-            background: white;
-            border-radius: 22px;
-            padding: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
+.panel{
+  background:rgba(255,255,255,.96);border:2px solid #f1d9dc;border-radius:20px;
+  box-shadow:var(--shadow);padding:12px;overflow:hidden
+}
+.weather-head,.traffic-head{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:2px 3px 10px;border-bottom:2px dashed #f1d9dc;margin-bottom:9px
+}
+.weather-head .left,.traffic-head .left{font-size:19px;font-weight:900}
+.weather-head .left:before{content:"☀️";margin-right:7px}
+.traffic-head .left:before{content:"🚌";margin-right:7px}
+.status-pill{
+  background:#ffe5ef;color:#f173a1;border-radius:10px;padding:7px 11px;font-size:12px;font-weight:900
+}
+.hero{
+  background:linear-gradient(135deg,#fffdfb,#fffdfd);
+  border-radius:16px;padding:6px 8px 10px
+}
 
-        /* 左側天氣區塊 */
-        .weather-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px dashed #ffe4e1;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
-        }
-        .weather-header-title { font-size: 20px; font-weight: bold; }
-        .hourly-btn {
-            background: #ffe4e1;
-            color: #db7093;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: bold;
-        }
+.temp-main{display:grid;grid-template-columns:1fr 92px;align-items:center;gap:10px;padding:2px 5px 5px}
+.temp{font-size:clamp(68px,9vw,104px);line-height:.92;color:var(--orange);font-weight:900;letter-spacing:-.04em}
+.temp-sub{font-size:13px;font-weight:800;color:#626a72;margin-top:7px}
+.weather-art{font-size:64px;filter:drop-shadow(0 5px 4px rgba(0,0,0,.08))}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:5px}
 
-        .location-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .location-name { font-size: 30px; font-weight: 900; }
-        .weather-desc {
-            background: #e0f7fa;
-            color: #00838f;
-            padding: 6px 15px;
-            border-radius: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            max-width: 60%;
-            text-align: right;
-        }
+/* 大字體天氣數據方塊 */
+.metric{
+  border:0;border-radius:14px;padding:14px 16px;min-height:70px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px
+}
+.metric:nth-child(1){background:#dbf5ef;color:#018f87}
+.metric:nth-child(2){background:#ffe1ec;color:#e96f9e}
+.metric:nth-child(3){background:#e4f3ff;color:#3479a6}
+.metric:nth-child(4){background:#fff1cf;color:#a56a00}
+.metric .label{font-size:clamp(17px,4vw,21px);font-weight:900;display:flex;align-items:center;gap:6px}
+.metric .value{font-size:clamp(17px,4vw,21px);font-weight:900;color:#293238}
 
-        .temp-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        #temperature { font-size: 90px; color: #ffb300; font-weight: 900; line-height: 1; }
-        #temp-range { font-size: 18px; color: #666; margin-top: 8px; font-weight: bold; }
-        .weather-icon img { width: 100px; }
+.hourly{
+  margin-top:10px;border:2px solid #f1d9dc;border-radius:15px;
+  background:#fffdfb;padding:9px 9px 8px;overflow:hidden
+}
+.hourly-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.hourly-head .label{font-size:15px;font-weight:900}
+.hourly-head .note{font-size:11px;color:#8c8a85}
+.hourly-scroll{
+  display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;
+  scrollbar-width:thin;-webkit-overflow-scrolling:touch
+}
+.hourly-card{
+  flex:0 0 76px;border-radius:12px;border:1px solid #efe5e3;
+  background:#fff;padding:7px 6px;text-align:center
+}
+.hourly-time{font-size:12px;font-weight:900;color:#59656b}
+.hourly-icon{font-size:24px;line-height:1.1;margin:4px 0}
+.hourly-temp{font-size:19px;font-weight:900;color:#eea300}
+.hourly-rain{font-size:11px;font-weight:900;margin-top:4px;color:#0b8f87}
+.hourly-rain.rain{color:#e65b85}
+.hourly-empty{font-size:13px;color:#898d8f;padding:11px 5px}
 
-        /* 統計欄位 (濕度、紫外線、體感) */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .stat-box {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 15px;
-            text-align: center;
-            border: 1px solid #eee;
-        }
-        .stat-label { font-size: 14px; color: #666; margin-bottom: 4px; }
-        .stat-val { font-size: 20px; font-weight: bold; color: #008b8b; }
+.bus-list{display:grid;gap:9px}
+.bus-card{
+  border:2px solid #eee4e2;border-radius:17px;padding:12px 14px;
+  background:linear-gradient(180deg,#fff,#fffafa)
+}
+.bus-top{display:flex;align-items:center;gap:12px}
+.route{
+  background:#0a9d9b;color:#fff;border-radius:11px;padding:8px 10px;min-width:76px;
+  font-size:26px;line-height:1;font-weight:900;text-align:center;letter-spacing:-.02em
+}
+.direction{display:flex;flex-direction:column;gap:3px;min-width:0}
+.dest{font-size:19px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stop-line{font-size:13px;color:#59656b;font-weight:800}
+.stop-line:before{content:"🚌";margin-right:4px}
+.eta-group{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:auto}
+.eta-now{color:#09ab96;font-size:26px;font-weight:900;white-space:nowrap;line-height:1}
+.next-label{font-size:13px;color:#8a8c91;background:#eef3f4;padding:4px 8px;border-radius:7px;font-weight:900;white-space:nowrap}
+.next-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;padding-top:10px;border-top:2px dashed #eee4e2}
+.next-label-small{font-size:12px;font-weight:900;color:#8a8c91}
+.eta{background:#e8f6f2;color:#087d74;padding:5px 9px;border-radius:8px;font-size:13px;font-weight:900}
+.eta.none{background:#f1f2f2;color:#7d8589}
 
-        /* 每小時天氣預測風格卡片 (參考第二張圖) */
-        .hourly-container {
-            background: #4a5568;
-            border-radius: 16px;
-            padding: 12px 15px;
-            color: white;
-            margin-top: auto;
-        }
-        .hourly-summary {
-            font-size: 15px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 6px;
-        }
-        .hourly-scroll {
-            display: flex;
-            justify-content: space-between;
-            text-align: center;
-        }
-        .hourly-item { font-size: 13px; }
-        .hourly-item img { width: 32px; height: 32px; margin: 4px 0; }
-        .hourly-temp { font-weight: bold; font-size: 15px; }
+.footer{
+  text-align:center;color:#8b8d8e;font-size:10px;line-height:1.5;padding:9px 4px
+}
 
-        /* 右側交通區塊 */
-        .bus-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            border-bottom: 2px dashed #ffe4e1;
-            padding-bottom: 10px;
-            color: #db7093;
-        }
-        .bus-route {
-            background: #f8f8ff;
-            border: 2px solid #e6e6fa;
-            border-radius: 16px;
-            padding: 14px 18px;
-            margin-bottom: 12px;
-        }
-        .route-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .route-num {
-            background: #008b8b;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            padding: 4px 12px;
-            border-radius: 8px;
-        }
-        .route-dest {
-            font-size: 18px;
-            flex-grow: 1;
-            margin-left: 15px;
-            font-weight: bold;
-        }
-        .eta-time {
-            font-size: 30px;
-            color: #2e8b57;
-            font-weight: bold;
-        }
-        .eta-sub {
-            text-align: right;
-            font-size: 14px;
-            color: #666;
-            margin-top: 8px;
-            font-weight: bold;
-        }
-    </style>
+@media (max-width:520px){
+  body{padding-left:7px;padding-right:7px}
+  .topbar{border-radius:15px}
+  .clock{font-size:41px}
+  .date{font-size:17px}
+  .small-time{display:none}
+  .refresh{padding:9px 12px}
+  .route{min-width:62px;font-size:22px}
+  .eta-now{font-size:22px}
+}
+</style>
 </head>
 <body>
-
-    <!-- 頂部時間列 -->
-    <div class="top-bar">
-        <div class="time-group">
-            <div id="time-container">00:00:00</div>
-            <div id="date-container">載入中...</div>
-        </div>
-        <div id="lunar-container">計算中...</div>
+<div class="app">
+  <header class="topbar">
+    <div id="clock" class="clock">--:--:--</div>
+    <div class="date-wrap">
+      <div id="date" class="date">--月--日</div><div class="flower">🌸</div>
     </div>
-
-    <div class="main-content">
-        <!-- 左半邊：天氣資訊 -->
-        <div class="card">
-            <div class="weather-header">
-                <div class="weather-header-title">☀️ 屯門即時與分時天氣</div>
-                <div class="hourly-btn">每時預報</div>
-            </div>
-            
-            <div class="location-row">
-                <div class="location-name">屯門 🎯</div>
-                <div class="weather-desc" id="weather-desc">載入中...</div>
-            </div>
-
-            <div class="temp-row">
-                <div class="temp-main">
-                    <div id="temperature">--°</div>
-                    <div id="temp-range">今日預測: --°C</div>
-                </div>
-                <div class="weather-icon">
-                    <img id="weather-icon-img" src="https://www.hko.gov.hk/images/HKOWxIconOutline/pic50.png" alt="weather icon">
-                </div>
-            </div>
-
-            <!-- 體感溫度、濕度、紫外線 -->
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-label">💧 相對濕度</div>
-                    <div class="stat-val" id="humidity">--%</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">🌡️ 體感溫度</div>
-                    <div class="stat-val" id="felt-temp">--°C</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">☀️ 紫外線</div>
-                    <div class="stat-val" id="uv-index">--</div>
-                </div>
-            </div>
-
-            <!-- 每小時預測 (參考第二張圖的設計) -->
-            <div class="hourly-container">
-                <div class="hourly-summary" id="hourly-summary-text">正在載入每小時天氣趨勢...</div>
-                <div class="hourly-scroll" id="hourly-scroll-container">
-                    <!-- JS 動態填入 -->
-                </div>
-            </div>
-        </div>
-
-        <!-- 右半邊：交通資訊 (業旺邨 + 聖彼得堂) -->
-        <div class="card">
-            <div class="bus-title">🚌 業旺邨 & 聖彼得堂 巴士即時班次</div>
-            
-            <!-- 57M (業旺邨) -->
-            <div class="bus-route">
-                <div class="route-header">
-                    <div class="route-num" style="background:#008b8b;">57M</div>
-                    <div class="route-dest">業旺邨 往 荔景(北)</div>
-                    <div class="eta-time" id="eta-57m">--</div>
-                </div>
-                <div class="eta-sub" id="eta-57m-sub">後續班次: --</div>
-            </div>
-
-            <!-- K53S (業旺邨) -->
-            <div class="bus-route">
-                <div class="route-header">
-                    <div class="route-num" style="background:#b8860b;">K53S</div>
-                    <div class="route-dest">業旺邨 往 屯門站</div>
-                    <div class="eta-time" id="eta-k53s">--</div>
-                </div>
-                <div class="eta-sub" id="eta-k53s-sub">後續班次: --</div>
-            </div>
-
-            <!-- 961S (業旺邨) -->
-            <div class="bus-route">
-                <div class="route-header">
-                    <div class="route-num" style="background:#8b0000;">961S</div>
-                    <div class="route-dest">業旺邨 往 銅鑼灣(維園)</div>
-                    <div class="eta-time" id="eta-961s">--</div>
-                </div>
-                <div class="eta-sub" id="eta-961s-sub">後續班次: --</div>
-            </div>
-
-            <!-- 聖彼得堂站路線 (例如 57M / 其他屯門經該站路線) -->
-            <div class="bus-route" style="background: #fff0f5;">
-                <div class="route-header">
-                    <div class="route-num" style="background:#db7093;">57M</div>
-                    <div class="route-dest">聖彼得堂 往 荔景(北)</div>
-                    <div class="eta-time" id="eta-stpet-1">--</div>
-                </div>
-                <div class="eta-sub" id="eta-stpet-sub">後續班次: --</div>
-            </div>
-        </div>
+    <div class="right-tools">
+      <div class="small-time"><div id="tinyDate">--/--</div><div id="tinyClock">--:--</div></div>
+      <button class="refresh" id="refreshBtn">⟳ 更新</button>
     </div>
+  </header>
 
-    <script>
-        // 1. 農曆與特別節日對照表 (支援指定西曆日期與農曆)
-        function getLunarAndFestival(date) {
-            const m = date.getMonth() + 1;
-            const d = date.getDate();
-            
-            // 簡易節日對照（可自行擴充）
-            const festivals = {
-                "8-19": "七夕 🌸",
-                "8-7": "立秋",
-                "10-1": "國慶節",
-                "12-25": "聖誕節",
-                "1-1": "元旦"
-            };
-            
-            let key = `${m}-${d}`;
-            let festivalStr = festivals[key] ? ` ✨ ${festivals[key]}` : "";
-            
-            // 簡易農曆對照推算或直接顯示示範
-            let lunarDays = ["初一","初二","初三","初四","初五","初六","初七","初八","初九","初十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十","廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
-            // 示範用：根據日期對應大約農曆
-            let lunarStr = "七月初六"; 
-            if(m === 8 && d === 19) lunarStr = "七月初七";
+  <main class="columns">
+    <!-- 左側天氣板塊 -->
+    <section class="panel">
+      <div class="weather-head">
+        <div class="left">屯門</div>
+        <div id="weatherUpdated" class="status-pill">更新時間：--:--</div>
+      </div>
+      <!-- 自動警告顯示於虛線下方右側 -->
+      <div id="warnings-container" class="warnings-container"></div>
 
-            return `${lunarStr}${festivalStr}`;
-        }
+      <div class="hero">
+          <div class="temp-main">
+            <div>
+              <div id="temp" class="temp">--°</div>
+              <div id="tempSub" class="temp-sub">今日預測：--°C - --°C</div>
+            </div>
+            <div id="tempIcon" class="weather-art">🌤️</div>
+          </div>
+          <div class="metrics">
+          <div class="metric"><div class="label">🌡️ 體感溫度</div><div id="feels" class="value">--°C</div></div>
+          <div class="metric"><div class="label">☀️ 紫外線指數</div><div id="uv" class="value">--</div></div>
+          <div class="metric"><div class="label">💧 相對濕度</div><div id="humidity" class="value">--%</div></div>
+          <div class="metric"><div class="label">☔ 降雨概率</div><div id="psr" class="value">--</div></div>
+        </div>
+      </div>
+      <section class="hourly" aria-label="每小時氣溫與降雨預測">
+        <div class="hourly-head">
+          <div class="label">每小時氣溫與降雨預測</div>
+          <div class="note">未來 12 小時 · 天文台分區預報</div>
+        </div>
+        <div id="hourlyForecast" class="hourly-scroll">
+          <div class="hourly-empty">正在載入逐小時預測…</div>
+        </div>
+      </section>
+    </section>
 
-        // 2. 時鐘與日期更新
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('time-container').innerText = now.toLocaleTimeString('en-US', { hour12: false });
-            
-            const days = ['日', '一', '二', '三', '四', '五', '六'];
-            document.getElementById('date-container').innerText = `${now.getMonth() + 1}月${now.getDate()}日 (${days[now.getDay()]}) 🌸`;
-            document.getElementById('lunar-container').innerText = getLunarAndFestival(now);
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
+    <!-- 右側交通板塊 -->
+    <section class="panel">
+      <div class="traffic-head">
+        <div class="left">業旺邨交通班次</div>
+        <div id="trafficUpdated" class="status-pill">更新時間：--:--</div>
+      </div>
+      <div id="busList" class="bus-list"></div>
+    </section>
+  </main>
 
-        // 3. 天文台天氣與警告資料
-        async function fetchWeather() {
-            try {
-                // 即時天氣 (rhrread)
-                const resNow = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
-                const dataNow = await resNow.json();
-                
-                const tmTemp = dataNow.temperature.data.find(d => d.place === '屯門');
-                if (tmTemp) document.getElementById('temperature').innerText = tmTemp.value + '°';
-                
-                if (dataNow.humidity && dataNow.humidity.data[0]) {
-                    document.getElementById('humidity').innerText = dataNow.humidity.data[0].value + '%';
-                }
-                
-                // 體感溫度 (如天文台提供或透過溫濕風簡易計算)
-                if(tmTemp) {
-                    document.getElementById('felt-temp').innerText = (tmTemp.value + 1) + '°C';
-                }
+  <div class="footer">
+    天氣資料：香港天文台開放數據；九巴 ETA：運輸署／九巴開放數據；K53S：港鐵巴士開放數據。
+    <br>本站僅作資訊展示，實際抵站時間及交通狀況或有變化。
+  </div>
+</div>
 
-                // 紫外線指數
-                if (dataNow.uvindex && dataNow.uvindex.data && dataNow.uvindex.data.length > 0) {
-                    document.getElementById('uv-index').innerText = dataNow.uvindex.data[0].value;
-                } else {
-                    document.getElementById('uv-index').innerText = "中";
-                }
+<script>
+const HKO = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php";
+const KMB = "https://data.etabus.gov.hk/v1/transport/kmb";
+const MTR = "https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule";
 
-                if (dataNow.icon && dataNow.icon[0]) {
-                    document.getElementById('weather-icon-img').src = `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${dataNow.icon[0]}.png`;
-                }
+/* 業旺邨專屬路線配置 */
+const BUS_CONFIG = [
+  {type:"kmb", route:"57M", dir:"O", direction:"荔景 (北)", waitStop:"業旺邨"},
+  {type:"kmb", route:"66X", dir:"O", direction:"奧運站", waitStop:"業旺邨"},
+  {type:"kmb", route:"66M", dir:"O", direction:"荃灣 (如心廣場)", waitStop:"業旺邨"},
+  {type:"kmb", route:"258D", dir:"O", direction:"藍田站", waitStop:"業旺邨"},
+  {type:"mtr", route:"K53S", direction:"循環線", waitStop:"業旺邨"}
+];
 
-                // 天氣概況與警告標誌檢查
-                const resForecast = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc');
-                const dataForecast = await resForecast.json();
-                
-                let desc = dataForecast.forecastPeriod ? dataForecast.forecastPeriod.split('。')[0] : "大致多雲";
-                
-                // 檢查警告信號 API (warnsum)
-                try {
-                    const resWarn = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc');
-                    const dataWarn = await resWarn.json();
-                    let warningBadges = "";
-                    if(dataWarn.WRAINA || dataWarn.WRAINR || dataWarn.WRAINB) warningBadges += " 🌧️[暴雨警告]";
-                    if(dataWarn.TC1 || dataWarn.TC3 || dataWarn.TC8NE || dataWarn.TC8SE || dataWarn.TC8NW || dataWarn.TC8SW) warningBadges += " 🌀[熱帶氣旋警告]";
-                    desc += warningBadges;
-                } catch(e) {}
+function getNowTime() {
+  return new Date().toLocaleTimeString("zh-HK", {hour:"2-digit", minute:"2-digit"});
+}
+function safeText(v, fallback="—"){
+  return (v === undefined || v === null || v === "") ? fallback : String(v);
+}
+function weatherIconFromText(text){
+  if(/雷暴|雷雨/.test(text)) return "⛈️";
+  if(/雨|驟雨/.test(text)) return "🌧️";
+  if(/晴|陽光充沛|天晴/.test(text)) return "☀️";
+  if(/多雲/.test(text)) return "🌥️";
+  return "🌤️";
+}
+function apparentTempC(t, rh){
+  const T = Number(t), R = Number(rh);
+  if(!Number.isFinite(T) || !Number.isFinite(R)) return null;
+  if(T < 20) return T;
+  const c1=-8.784695, c2=1.61139411, c3=2.338549,
+        c4=-0.14611605, c5=-0.012308094,
+        c6=-0.016424828, c7=0.002211732,
+        c8=0.00072546, c9=-0.000003582;
+  const hi = c1+c2*T+c3*R+c4*T*R+c5*T*T+c6*R*R+c7*T*T*R+c8*T*R*R+c9*T*T*R*R;
+  return Math.round(hi*10)/10;
+}
+async function json(url){
+  const res = await fetch(url, {cache:"no-store"});
+  if(!res.ok) throw new Error(res.status+" "+url);
+  const text = await res.text();
+  try { return JSON.parse(text.replace(/^\uFEFF/,"").trim()); } 
+  catch(e) { throw new Error("JSON Parse Error: " + url); }
+}
 
-                document.getElementById('weather-desc').innerText = desc;
+const ARWF_TUEN_MUN = "https://maps.weather.gov.hk/ocf/dat/TMN.xml";
 
-                // 模擬右側圖片風格的每小時預測趨勢
-                let hourlyHtml = '';
-                let currentHour = new Date().getHours();
-                let icons = [dataNow.icon[0] || '50', '60', '62', '50', '63'];
-                let temps = [tmTemp ? tmTemp.value : 30, 29, 29, 28, 28];
-                
-                document.getElementById('hourly-summary-text').innerText = `預計未來數小時天氣穩定，氣溫約 ${tmTemp ? tmTemp.value : 30}°C。`;
+function weatherEmoji(value){
+  const t = String(value ?? "").toLowerCase();
+  if(/雷|thunder|storm/.test(t)) return "⛈️";
+  if(/雨|驟雨|shower|rain/.test(t)) return "🌧️";
+  if(/陰|overcast/.test(t)) return "☁️";
+  if(/多雲|cloudy|cloud/.test(t)) return "🌥️";
+  if(/晴|sunny|clear/.test(t)) return "☀️";
+  return "🌤️";
+}
+function parseForecastTime(v){
+  if(v == null) return null;
+  const s = String(v).trim();
+  const d = new Date(s.replace(" ", "T"));
+  if(!Number.isNaN(d.getTime())) return d;
+  return null;
+}
+function firstKey(obj, patterns){
+  if(!obj || typeof obj!=="object" || Array.isArray(obj)) return null;
+  const keys=Object.keys(obj);
+  return keys.find(k=>patterns.some(p=>p.test(k))) || null;
+}
+function toNum(v){
+  if(v==null || v==="") return null;
+  const n=Number(String(v).replace(/[^\d.+-]/g,""));
+  return Number.isFinite(n) ? n : null;
+}
+function normalizeHourlyRows(payload){
+  const candidates=[];
+  function walk(v){
+    if(v==null) return;
+    if(Array.isArray(v)){ v.forEach(walk); return; }
+    if(typeof v!=="object") return;
+    const timeK=firstKey(v,[/fcst.*time/i,/forecast.*time/i,/valid.*time/i,/datetime/i,/date.*time/i,/^time$/i]);
+    const tempK=firstKey(v,[/^temp/i,/temperature/i]);
+    const weatherK=firstKey(v,[/weather/i,/sky/i,/wx/i,/icon/i,/condition/i]);
+    if(timeK && tempK){
+      const t=parseForecastTime(v[timeK]);
+      const temp=toNum(v[tempK]?.value ?? v[tempK]);
+      if(t && temp!==null) candidates.push({time:t,temp,weather:weatherK ? v[weatherK] : ""});
+    }
+    if(timeK && Array.isArray(v[timeK]) && tempK && Array.isArray(v[tempK])){
+      const times=v[timeK], temps=v[tempK], wv=weatherK && Array.isArray(v[weatherK]) ? v[weatherK] : [];
+      for(let i=0;i<Math.min(times.length,temps.length);i++){
+        const t=parseForecastTime(times[i]), temp=toNum(temps[i]?.value ?? temps[i]);
+        if(t && temp!==null) candidates.push({time:t,temp,weather:wv[i] ?? ""});
+      }
+    }
+    Object.values(v).forEach(walk);
+  }
+  walk(payload);
+  const seen=new Set();
+  return candidates.filter(x=>{
+    const key=x.time.toISOString().slice(0,13);
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  }).sort((a,b)=>a.time-b.time);
+}
 
-                for(let i=0; i<5; i++) {
-                    let h = (currentHour + i) % 24;
-                    hourlyHtml += `
-                        <div class="hourly-item">
-                            <div>${h}:00</div>
-                            <img src="https://www.hko.gov.hk/images/HKOWxIconOutline/pic${icons[i % icons.length]}.png">
-                            <div class="hourly-temp">${temps[i % temps.length]}°</div>
-                        </div>
-                    `;
-                }
-                document.getElementById('hourly-scroll-container').innerHTML = hourlyHtml;
+async function loadHourlyForecast(){
+  const box=document.getElementById("hourlyForecast");
+  try{
+    const res=await fetch(ARWF_TUEN_MUN,{cache:"no-store"});
+    const text=await res.text();
+    const payload=JSON.parse(text.replace(/^\uFEFF/,"").trim());
+    const rows=normalizeHourlyRows(payload).filter(x=>x.time.getTime() >= Date.now()-30*60*1000).slice(0,12);
 
-            } catch (error) {
-                console.error("天氣獲取失敗", error);
-            }
-        }
+    box.innerHTML="";
+    if(!rows.length){ box.innerHTML='<div class="hourly-empty">暫時未能取得屯門逐小時預測。</div>'; return; }
+    rows.forEach(r=>{
+      const rain = /雨|驟雨|雷|rain|shower|thunder|storm/i.test(String(r.weather));
+      const card=document.createElement("div"); card.className="hourly-card";
+      card.innerHTML=`
+        <div class="hourly-time">${r.time.toLocaleTimeString("zh-HK",{hour:"2-digit",minute:"2-digit",hour12:false})}</div>
+        <div class="hourly-icon">${weatherEmoji(r.weather)}</div>
+        <div class="hourly-temp">${Math.round(r.temp)}°</div>
+        <div class="hourly-rain ${rain ? "rain":""}">${rain ? "🌧 有雨" : "☀ 無雨"}</div>`;
+      box.appendChild(card);
+    });
+  }catch(e){ box.innerHTML='<div class="hourly-empty">暫時未能取得逐小時預測。</div>'; }
+}
 
-        // 4. 巴士 ETA 獲取 (業旺邨及聖彼得堂)
-        let yipWongStopId = null;
-        let stPeterStopId = null;
+async function loadWeather(){
+  document.getElementById("weatherUpdated").textContent = `更新時間：${getNowTime()}`;
+  try {
+    const rhr = await json(HKO+"?dataType=rhrread&lang=tc");
+    const temps = rhr.temperature?.data || [];
+    const tObj = temps.find(x => x.place === "屯門") || temps.find(x => /屯門/.test(x.place||""));
+    const temp = Number(tObj?.value);
+    const humidity = Number(rhr.humidity?.data?.[0]?.value);
+    const uvObj = rhr.uvindex?.data?.[0];
 
-        async function fetchBusETA() {
-            try {
-                // 尋找業旺邨與聖彼得堂的 Stop ID
-                if (!yipWongStopId || !stPeterStopId) {
-                    const routeRes = await fetch('https://data.etabus.gov.hk/v1/transport/kmb/route-stop/57M/outbound/1');
-                    const routeData = await routeRes.json();
-                    for (let item of routeData.data) {
-                        const stopRes = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop/${item.stop}`);
-                        const stopData = await stopRes.json();
-                        if (stopData.data) {
-                            if (stopData.data.name_tc.includes('業旺')) yipWongStopId = item.stop;
-                            if (stopData.data.name_tc.includes('聖彼得堂')) stPeterStopId = item.stop;
-                        }
-                    }
-                }
+    document.getElementById("temp").textContent = Number.isFinite(temp) ? `${temp}°` : "--°";
+    document.getElementById("humidity").textContent = Number.isFinite(humidity) ? `${humidity}%` : "--%";
+    document.getElementById("feels").textContent = Number.isFinite(apparentTempC(temp,humidity)) ? `${apparentTempC(temp,humidity)}°C` : "--°C";
+    document.getElementById("uv").textContent = uvObj ? `${safeText(uvObj.value)}${uvObj.desc ? " · "+uvObj.desc : ""}` : "--";
+  } catch(e) {}
 
-                let now = new Date();
+  try {
+    const flw = await json(HKO+"?dataType=flw&lang=tc");
+    const forecastText = safeText(flw.forecastDesc || flw.forecastDescTC || flw.generalSituation, "");
+    document.getElementById("tempIcon").textContent = weatherIconFromText(forecastText);
+  } catch(e) {}
 
-                // 抓取業旺邨 57M
-                if (yipWongStopId) {
-                    const etaRes = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${yipWongStopId}`);
-                    const etaData = await etaRes.json();
-                    
-                    // 57M
-                    let etas57 = etaData.data.filter(e => e.route === '57M' && new Date(e.eta) > now);
-                    if(etas57.length > 0) {
-                        let diff = Math.round((new Date(etas57[0].eta) - now) / 60000);
-                        document.getElementById('eta-57m').innerText = diff > 0 ? `${diff} 分` : '即將抵達';
-                        if(etas57.length > 1) {
-                            let nextTime = new Date(etas57[1].eta).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12:false});
-                            document.getElementById('eta-57m-sub').innerText = `後續班次: ${nextTime}`;
-                        }
-                    } else {
-                        document.getElementById('eta-57m').innerText = '暫無';
-                    }
+  try {
+    const fnd = await json(HKO+"?dataType=fnd&lang=tc");
+    const fToday = fnd.weatherForecast?.[0] || fnd.data?.[0] || {};
+    const minT = fToday.forecastMintemp?.value ?? fToday.minTemp?.value ?? fToday.mintemp?.value;
+    const maxT = fToday.forecastMaxtemp?.value ?? fToday.maxTemp?.value ?? fToday.maxtemp?.value;
+    if(minT !== undefined && maxT !== undefined) document.getElementById("tempSub").textContent = `今日預測：${minT}°C - ${maxT}°C`;
+    
+    const psrObj = fToday.PSR || fToday.psr || fToday.forecastPSR;
+    let psrVal = "未提供";
+    if (typeof psrObj === 'object' && psrObj !== null) psrVal = psrObj.value ?? psrObj.desc ?? JSON.stringify(psrObj);
+    else if (psrObj !== undefined && psrObj !== null && psrObj !== "") psrVal = String(psrObj);
+    if (psrVal !== "未提供" && !psrVal.includes("%")) psrVal += "%";
+    document.getElementById("psr").textContent = psrVal;
+  } catch(e) {}
 
-                    // K53S
-                    let etasK53 = etaData.data.filter(e => e.route === 'K53S' && new Date(e.eta) > now);
-                    if(etasK53.length > 0) {
-                        let diff = Math.round((new Date(etasK53[0].eta) - now) / 60000);
-                        document.getElementById('eta-k53s').innerText = diff > 0 ? `${diff} 分` : '即將抵達';
-                    } else {
-                        document.getElementById('eta-k53s').innerText = '暫無班次';
-                    }
+  try {
+    const warn = await json(HKO+"?dataType=warningInfo&lang=tc");
+    renderWarnings(extractWarnings(warn));
+  } catch(e) {}
+}
 
-                    // 961S
-                    let etas961 = etaData.data.filter(e => e.route === '961S' && new Date(e.eta) > now);
-                    if(etas961.length > 0) {
-                        let diff = Math.round((new Date(etas961[0].eta) - now) / 60000);
-                        document.getElementById('eta-961s').innerText = diff > 0 ? `${diff} 分` : '即將抵達';
-                    } else {
-                        document.getElementById('eta-961s').innerText = '暫無班次';
-                    }
-                }
+function extractWarnings(payload){
+  const out=[]; const textParts=[];
+  const add = (label, cls) => { if(label && !out.some(x=>x.label===label)) out.push({label, cls}); };
+  const walk=(v)=>{
+    if(v==null) return;
+    if(typeof v==="string") textParts.push(v);
+    else if(Array.isArray(v)) v.forEach(walk);
+    else if(typeof v==="object") Object.entries(v).forEach(([k,val])=>{
+      if(typeof val==="string" && /(warning|desc|title|name|message|type|code|signal)/i.test(k)) textParts.push(val);
+      if(typeof val==="object") walk(val);
+    });
+  };
+  walk(payload);
+  const text=textParts.join(" ");
+  const tc = text.match(/熱帶氣旋警告信號[^。；\n]*/);
+  const rain = text.match(/暴雨警告信號[^。；\n]*/);
+  if(tc) add("🌀 "+tc[0],"danger");
+  if(rain) add("🌧️ "+rain[0],"danger");
+  if(/雷暴警告/.test(text)) add("⚡ 雷暴警告","warn");
+  if(/季候風/.test(text)) add("💨 強烈季候風信號","info");
+  if(/酷熱天氣警告/.test(text)) add("☀️ 酷熱天氣警告","warn");
+  if(/寒冷天氣警告/.test(text)) add("❄️ 寒冷天氣警告","info");
+  return out;
+}
+function renderWarnings(items){
+  const el=document.getElementById("warnings-container");
+  el.innerHTML="";
+  items.forEach(x=>{
+    const s=document.createElement("span");
+    s.className=`badge ${x.cls}`; s.textContent=x.label; el.appendChild(s);
+  });
+}
 
-                // 抓取聖彼得堂站
-                if (stPeterStopId) {
-                    const stRes = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/${stPeterStopId}`);
-                    const stData = await stRes.json();
-                    let stEtas = stData.data.filter(e => e.route === '57M' && new Date(e.eta) > now);
-                    if(stEtas.length > 0) {
-                        let diff = Math.round((new Date(stEtas[0].eta) - now) / 60000);
-                        document.getElementById('eta-stpet-1').innerText = diff > 0 ? `${diff} 分` : '即將抵達';
-                    } else {
-                        document.getElementById('eta-stpet-1').innerText = '暫無';
-                    }
-                }
+async function getKmbStopId(route, dir, targetName){
+  const data = await json(`${KMB}/route-stop/${encodeURIComponent(route)}/${encodeURIComponent(dir)}/1`);
+  const rows = data.data || [];
+  const exact = rows.find(x => x.name_tc === targetName || x.name === targetName);
+  if(exact) return exact.stop;
+  const partial = rows.find(x => (x.name_tc||"").includes(targetName) || (x.name||"").includes(targetName));
+  return partial?.stop || rows[0]?.stop || null;
+}
 
-            } catch (error) {
-                console.error("ETA 獲取錯誤", error);
-            }
-        }
+// 傳回 { text: "分鐘", time: "HH:MM" } 物件
+function fmtEta(iso){
+  if(!iso) return null;
+  const d=new Date(iso), mins=Math.round((d-Date.now())/60000);
+  if(!Number.isFinite(mins) || mins < -1) return null;
+  const tStr = d.toLocaleTimeString("zh-HK",{hour:"2-digit",minute:"2-digit"});
+  if(mins <= 1) return { text: "即將到站", time: tStr };
+  return { text: `${mins} 分鐘`, time: tStr };
+}
 
-        fetchWeather();
-        fetchBusETA();
-        setInterval(fetchWeather, 60000 * 5);
-        setInterval(fetchBusETA, 60000);
-    </script>
+async function getKmbEta(item){
+  const stopId = await getKmbStopId(item.route, item.dir, item.waitStop);
+  if(!stopId) return [];
+  const data = await json(`${KMB}/eta/${encodeURIComponent(stopId)}`);
+  const rows = (data.data||[]).filter(x => x.route === item.route && x.eta).slice(0,3);
+  return rows.map(x=>fmtEta(x.eta)).filter(Boolean);
+}
+
+async function getMtrEta(item){
+  const data = await json(MTR);
+  const rows = data.busStop || data.data || [];
+  const flat = Array.isArray(rows) ? rows : Object.values(rows);
+  const matches=[];
+  const scan=(v)=>{
+    if(v==null) return;
+    if(Array.isArray(v)){v.forEach(scan);return;}
+    if(typeof v==="object"){
+      const route = String(v.routeNo ?? v.route ?? v.route_no ?? "");
+      const stop = String(v.busStopName ?? v.stopName ?? v.stop ?? v.busStop ?? "");
+      if(route.toUpperCase()==="K53S" && (!item.waitStop || stop.includes(item.waitStop))){
+        const eta = v.eta ?? v.arrivalTime ?? v.time ?? v.estimatedArrivalTime;
+        if(eta) matches.push(eta);
+      }
+      Object.values(v).forEach(scan);
+    }
+  };
+  scan(flat);
+  return matches.map(fmtEta).filter(Boolean).slice(0,3);
+}
+
+function busCard(item){
+  const wrap=document.createElement("article");
+  wrap.className="bus-card";
+  wrap.innerHTML=`
+    <div class="bus-top">
+      <div class="route">${item.route}</div>
+      <div class="direction">
+        <div class="dest">往 ${item.direction}</div>
+        <div class="stop-line">🚌 ${item.waitStop}</div>
+      </div>
+      <div class="eta-group">
+        <div class="eta-now">—</div>
+        <div class="next-label">--:--</div>
+      </div>
+    </div>
+    <div class="next-row">
+      <span class="next-label-small">後續班次：</span>
+      <span class="loading">讀取中…</span>
+    </div>`;
+  loadBusInto(wrap,item);
+  return wrap;
+}
+
+async function loadBusInto(card,item){
+  const mainEl=card.querySelector(".eta-now");
+  const timeEl=card.querySelector(".next-label");
+  const rowEl=card.querySelector(".next-row");
+  try{
+    const vals = item.type==="kmb" ? await getKmbEta(item) : await getMtrEta(item);
+    if(!vals.length){
+      mainEl.textContent="—"; timeEl.textContent="—";
+      rowEl.innerHTML='<span class="next-label-small">後續班次：</span><span class="eta none">暫無即時班次</span>';
+      return;
+    }
+    const first = vals[0];
+    mainEl.textContent = first.text;
+    timeEl.textContent = first.time;
+    
+    rowEl.innerHTML='<span class="next-label-small">後續班次：</span>';
+    if (vals.length > 1) {
+      vals.slice(1).forEach(v=>{
+        const s=document.createElement("span"); s.className="eta"; s.textContent=`${v.text} (${v.time})`; rowEl.appendChild(s);
+      });
+    } else {
+      rowEl.innerHTML += '<span class="eta none">暫無後續資料</span>';
+    }
+  }catch(e){
+    mainEl.textContent="—"; timeEl.textContent="—";
+    rowEl.innerHTML='<span class="next-label-small">後續班次：</span><span class="eta none">暫時未能讀取</span>';
+  }
+}
+
+function loadBuses(){
+  document.getElementById("trafficUpdated").textContent = `更新時間：${getNowTime()}`;
+  const el=document.getElementById("busList"); el.innerHTML="";
+  BUS_CONFIG.forEach(item=>el.appendChild(busCard(item)));
+}
+
+function updateLunarDateAndClock(){
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,"0");
+  const mm=String(now.getMinutes()).padStart(2,"0");
+  const ss=String(now.getSeconds()).padStart(2,"0");
+  document.getElementById("clock").textContent=`${hh}:${mm}:${ss}`;
+  document.getElementById("tinyClock").textContent=`${hh}:${mm}`;
+  document.getElementById("tinyDate").textContent=`${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")}`;
+
+  try {
+    const d = Solar.fromDate(now), lunar = d.getLunar();
+    let festival = "";
+    const festivals = lunar.getFestivals(), otherFestivals = lunar.getOtherFestivals();
+    if (festivals?.length) festival = festivals[0];
+    else if (otherFestivals?.length) festival = otherFestivals[0];
+    else {
+      const solarFestivals = d.getFestivals();
+      if (solarFestivals?.length) festival = solarFestivals[0];
+    }
+    document.getElementById("date").textContent = festival ? festival : `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+  } catch (err) {
+    document.getElementById("date").textContent = `${now.getMonth()+1}月${now.getDate()}日`;
+  }
+}
+
+updateLunarDateAndClock();
+setInterval(updateLunarDateAndClock, 1000);
+
+async function refreshAll(){
+  await loadWeather();
+  loadHourlyForecast();
+  loadBuses();
+}
+
+document.getElementById("refreshBtn").addEventListener("click", refreshAll);
+refreshAll();
+setInterval(refreshAll, 60_000);
+</script>
 </body>
 </html>
