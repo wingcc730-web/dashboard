@@ -248,7 +248,6 @@
             font-weight: bold;
             color: var(--teal-main);
         }
-        /* 淺色背景時間標籤，與分鐘數字底部對齊 */
         .eta-time-tag {
             background-color: #e6f6f4;
             color: var(--teal-main);
@@ -344,15 +343,14 @@
                 </div>
             </div>
 
-            <!-- Google Calendar 區塊 -->
+            <!-- Google Calendar 區塊 (已整合 4 個自訂日曆) -->
             <div class="calendar-section">
                 <div class="forecast-header" style="margin-bottom: 10px;">
                     <div>📅 Google 日曆行程</div>
-                    <div style="font-size:0.8rem; color:#999;">月巴Dating / Travel / Working</div>
+                    <div style="font-size:0.8rem; color:#999;">月巴Dating / Travel / Working / 香港假日</div>
                 </div>
                 <div class="calendar-wrapper">
-                    <!-- 修正 400 錯誤：使用正確的嵌入格式 (包含香港假日及多曆檢視) -->
-                    <iframe src="https://calendar.google.com/calendar/embed?height=280&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=0&src=zh-hk.official%23holiday%40group.v.calendar.google.com" style="border:0" width="100%" height="260" frameborder="0" scrolling="no"></iframe>
+                    <iframe src="https://calendar.google.com/calendar/embed?height=300&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=1&mode=MONTH&src=dc89b4793ace2057fecdec46d4993dd5afe36ad943d15934b7b00a099a2d63f6%40group.calendar.google.com&src=46b5edaa088a96fb4cf4a2ce028f4fad9be8c6225b65add94502c53809cf63df%40group.calendar.google.com&src=f438bd70999c821aadcda50f018273bbf83a40495fca259c10d826477a34eaf1%40group.calendar.google.com&src=zh.hong_kong%23holiday%40group.v.calendar.google.com" style="border:0" width="100%" height="280" frameborder="0" scrolling="no"></iframe>
                 </div>
             </div>
         </section>
@@ -416,11 +414,10 @@
             document.getElementById('temp-range').textContent = `今日預測 : ${todayForecast.forecastMintemp.value}°C - ${todayForecast.forecastMaxtemp.value}°C`;
             document.getElementById('rain-prob').textContent = `${todayForecast.PSR || '低'}`;
             
-            // 渲染未來 7 天預測 (日期格式 21/08(五)，下方放天氣圖示與溫度，無降雨資訊)
             let forecastHTML = '';
             dataFnd.weatherForecast.slice(0, 7).forEach(day => {
                 const dateStr = day.forecastDate.substring(6,8) + "/" + day.forecastDate.substring(4,6);
-                const weekStr = day.week.substring(2, 3); // 星期X 取簡字
+                const weekStr = day.week.substring(2, 3);
                 forecastHTML += `
                     <div class="forecast-day">
                         <div class="date">${dateStr}(${weekStr})</div>
@@ -439,14 +436,14 @@
         }
     }
 
-    // --- 3. 交通 API 邏輯 (包含 57M, 66X, 66M, 258D, K53S) ---
+    // --- 3. 交通 API 邏輯 (包含 K53S 及正確車站：業旺邨) ---
     const KMB_BASE = "https://data.etabus.gov.hk/v1/transport/kmb";
     const busRoutes = [
         { route: "57M", dir: "O", dest: "荔景 (北)", stopName: "業旺邨" },
         { route: "66X", dir: "O", dest: "奧運站", stopName: "聖彼得堂" },
         { route: "66M", dir: "O", dest: "荃灣 (如心廣場)", stopName: "聖彼得堂" },
         { route: "258D", dir: "O", dest: "藍田站", stopName: "聖彼得堂" },
-        { route: "K53S", dir: "O", dest: "屯門站", stopName: "置樂花園" }
+        { route: "K53S", dir: "O", dest: "屯門站", stopName: "業旺邨" }
     ];
 
     async function getKmbStopId(route, dir, targetName) {
@@ -455,7 +452,7 @@
             const res = await fetch(`${KMB_BASE}/route-stop/${encodeURIComponent(route)}/${apiDir}/1`);
             const data = await res.json();
             const rows = data.data || [];
-            const matchStr = targetName.includes("聖彼") ? "聖彼" : targetName;
+            const matchStr = targetName.includes("業旺") ? "業旺" : (targetName.includes("聖彼") ? "聖彼" : targetName);
             const exact = rows.find(x => (x.name_tc||"").includes(matchStr));
             return exact?.stop || rows[0]?.stop || null;
         } catch(e) {
@@ -476,7 +473,7 @@
             
             for (const bus of busRoutes) {
                 const stopId = await getKmbStopId(bus.route, bus.dir, bus.stopName);
-                let mainEtaHTML = `<span style="font-size:1.4rem; color:#999;">暫時未能讀取</span>`;
+                let mainEtaHTML = `<span style="font-size:1.3rem; color:#999;">暫時未能讀取</span>`;
                 let subEtaHTML = `<span style="font-size:0.9rem;">沒有後續班次</span>`;
                 
                 if (stopId) {
