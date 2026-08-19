@@ -505,21 +505,38 @@
                         }
                     }
                 } else if (bus.type === "MTR") {
-                    // 港鐵巴士 API 抓取邏輯
+                    // --- 修改部分：港鐵巴士 API 抓取邏輯 ---
                     try {
-                        const res = await fetch(`${MTR_BUS_BASE}?route=${bus.route}`);
+                        // 港鐵巴士 API 要求使用 POST，並在 body 帶上 language: "zh"
+                        const res = await fetch(MTR_BUS_BASE, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ language: 'zh' })
+                        });
                         const data = await res.json();
-                        if (data && data.data && data.data.routeList) {
-                            const rInfo = data.data.routeList.find(r => r.route === bus.route);
-                            if (rInfo && rInfo.stopList) {
-                                const targetStop = rInfo.stopList.find(s => s.stopName && s.stopName.includes(bus.stopName));
-                                if (targetStop && targetStop.timeList && targetStop.timeList.length > 0) {
-                                    const mtrEtas = targetStop.timeList.map(t => {
-                                        // 港鐵 API 通常直接提供倒數分鐘數或時間
-                                        const timeStr = t.time || "";
-                                        const mins = t.countdown !== undefined ? parseInt(t.countdown) : null;
+                        
+                        if (data && data.busStop) {
+                            // 比對站名 (例如 "業旺邨")
+                            const targetStop = data.busStop.find(s => s.busStopName && s.busStopName.includes(bus.stopName));
+                            
+                            if (targetStop && targetStop.routeList) {
+                                // 比對路線 (例如 "K53S")
+                                const rInfo = targetStop.routeList.find(r => r.routeName === bus.route);
+                                
+                                if (rInfo && rInfo.busLocation && rInfo.busLocation.length > 0) {
+                                    // MTR API 給的是秒數倒數 (arrivalTimeInSecond)
+                                    const mtrEtas = rInfo.busLocation.map(t => {
+                                        const diffInSeconds = parseInt(t.arrivalTimeInSecond);
+                                        const mins = Math.max(0, Math.floor(diffInSeconds / 60));
+                                        
+                                        // 計算絕對時間 HH:mm
+                                        const etaDate = new Date(Date.now() + diffInSeconds * 1000);
+                                        const timeStr = `${String(etaDate.getHours()).padStart(2, '0')}:${String(etaDate.getMinutes()).padStart(2, '0')}`;
+                                        
                                         return { mins, timeStr };
-                                    }).filter(t => t.mins !== null || t.timeStr !== "");
+                                    }).filter(t => !isNaN(t.mins)).sort((a, b) => a.mins - b.mins);
 
                                     if (mtrEtas.length > 0) {
                                         const first = mtrEtas[0];
@@ -536,6 +553,7 @@
                     } catch (err) {
                         console.error("MTR Bus API error", err);
                     }
+                    // --- 修改部分結束 ---
                 }
                 
                 const card = document.createElement('div');
