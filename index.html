@@ -15,12 +15,9 @@
 
     <title>個人天氣與交通儀表板</title>
 
-    <link rel="preconnect" href="https://data.weather.gov.hk">
-    <link rel="preconnect" href="https://data.etabus.gov.hk">
-    <link rel="preconnect" href="https://rt.data.gov.hk">
-    <link rel="preconnect" href="https://calendar.google.com">
-
-    <style>
+    https://data.weather.gov.hk
+    <link rel="preconnect" href="https://data.data.gov.hk
+    <link rel="preconnect" href="https://le>
         :root {
             --bg-main: #fdf6f5;
             --pink-border: #f4b8c8;
@@ -140,11 +137,9 @@
 
         .content-grid {
             display: grid;
-
             grid-template-columns:
                 minmax(0, 1.15fr)
                 minmax(0, 0.85fr);
-
             gap: 20px;
             align-items: start;
         }
@@ -477,7 +472,7 @@
             border-radius: 10px;
         }
 
-        /* 一般手機直向 */
+        /* 手機直向及較窄視窗 */
 
         @media only screen and (max-width: 800px) {
             body {
@@ -517,6 +512,10 @@
             .weather-grid {
                 grid-template-columns: 1fr;
                 gap: 10px;
+            }
+
+            .bus-main {
+                align-items: flex-start;
             }
 
             .bus-eta-main {
@@ -726,6 +725,67 @@
                 font-size: 0.61rem;
             }
         }
+
+        /* iPad 及一般平板 */
+
+        @media only screen
+            and (min-width: 801px)
+            and (max-width: 1400px)
+            and (min-height: 501px) {
+
+            body {
+                padding-top: max(14px, var(--safe-top));
+                padding-right: max(14px, var(--safe-right));
+                padding-bottom: max(14px, var(--safe-bottom));
+                padding-left: max(14px, var(--safe-left));
+            }
+
+            .dashboard {
+                max-width: 1200px;
+            }
+
+            .content-grid {
+                gap: 14px;
+            }
+
+            .top-bar {
+                padding: 14px 20px;
+                margin-bottom: 14px;
+            }
+
+            .card {
+                padding: 15px;
+                border-radius: 16px;
+            }
+
+            .weather-grid {
+                gap: 10px;
+            }
+
+            .w-item {
+                padding: 11px;
+                font-size: 0.9rem;
+            }
+
+            .calendar-wrapper iframe {
+                height: 240px;
+            }
+
+            .bus-card {
+                padding: 11px;
+                margin-bottom: 10px;
+            }
+
+            .bus-route-box {
+                font-size: 1.05rem;
+                padding: 5px 9px;
+                margin-right: 9px;
+            }
+
+            .bus-eta-main {
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
 
@@ -845,19 +905,11 @@
             <div class="calendar-section">
 
                 <div class="forecast-header">
-                    <div>📅 Google 日曆行程</div>
+                    <div>📅 Google 日曆行程及香港假期</div>
                 </div>
 
                 <div class="calendar-wrapper">
-                    <iframe
-                        src="https://calendar.google.com/calendar/embed?height=300&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=1&mode=MONTH&src=dc89b4793ace2057fecdec46d4993dd5afe36ad943d15934b7b00a099a2d63f6%40group.calendar.google.com&color=%238E24AA&src=46b5edaa088a96fb4cf4a2ce028f4fad9be8c6225b65add94502c53809cf63df%40group.calendar.google.com&color=%233F51B5&src=f438bd70999c821aadcda50f018273bbf83a40495fca259c10d826477a34eaf1%40group.calendar.google.com&color=%230B8043"
-                        width="100%"
-                        height="280"
-                        frameborder="0"
-                        scrolling="no"
-                        loading="lazy"
-                        title="Google 日曆行程"
-                    ></iframe>
+                    https://calendar.google.com/calendar/embed?height=300&wkst=1&ctz=Asia%2FHong_Kong&showTitle=0&showNav=1&showPrint=0&showTabs=0&showCalendars=1&mode=MONTH&src=dc89b4793ace2057fecdec46d4993dd5afe36ad943d15934b7b00a099a2d63f6%40group.calendar.google.com&color=%238E24AA&src=46b5edaa088a96fb4cf4a2ce028f4fad9be8c6225b65add94502c53809cf63df%40group.calendar.google.com&color=%233F51B5&src=f438bd70999c821aadcda50f018273bbf83a40495fca259c10d826477a34eaf1%40group.calendar.google.com&color=%230B8043&src=zh.hong_kong%23holiday%40group.v.calendar.google.com&color=%23D50000</iframe>
                 </div>
 
             </div>
@@ -905,20 +957,14 @@
     }
 
     function getEtaClockTime(seconds) {
-        const etaDate =
-            new Date(
-                Date.now() +
-                seconds * 1000
-            );
+        const etaDate = new Date(
+            Date.now() + seconds * 1000
+        );
 
         return (
-            String(
-                etaDate.getHours()
-            ).padStart(2, "0") +
+            String(etaDate.getHours()).padStart(2, "0") +
             ":" +
-            String(
-                etaDate.getMinutes()
-            ).padStart(2, "0")
+            String(etaDate.getMinutes()).padStart(2, "0")
         );
     }
 
@@ -927,20 +973,17 @@
     function updateClock() {
         const now = new Date();
 
-        const hh =
-            String(
-                now.getHours()
-            ).padStart(2, "0");
+        const hh = String(
+            now.getHours()
+        ).padStart(2, "0");
 
-        const mm =
-            String(
-                now.getMinutes()
-            ).padStart(2, "0");
+        const mm = String(
+            now.getMinutes()
+        ).padStart(2, "0");
 
-        const ss =
-            String(
-                now.getSeconds()
-            ).padStart(2, "0");
+        const ss = String(
+            now.getSeconds()
+        ).padStart(2, "0");
 
         document.getElementById(
             "clock-time"
@@ -1004,21 +1047,14 @@
         weatherIsLoading = true;
 
         try {
-            const responses =
-                await Promise.all([
-                    fetch(
-                        HKO_RHRREAD,
-                        {
-                            cache: "no-store"
-                        }
-                    ),
-                    fetch(
-                        HKO_FND,
-                        {
-                            cache: "no-store"
-                        }
-                    )
-                ]);
+            const responses = await Promise.all([
+                fetch(HKO_RHRREAD, {
+                    cache: "no-store"
+                }),
+                fetch(HKO_FND, {
+                    cache: "no-store"
+                })
+            ]);
 
             if (
                 !responses[0].ok ||
@@ -1029,19 +1065,17 @@
                 );
             }
 
-            const values =
-                await Promise.all([
-                    responses[0].json(),
-                    responses[1].json()
-                ]);
+            const values = await Promise.all([
+                responses[0].json(),
+                responses[1].json()
+            ]);
 
             const dataRhr = values[0];
             const dataFnd = values[1];
 
             const tmTemp =
                 dataRhr.temperature.data.find(
-                    item =>
-                        item.place === "屯門"
+                    item => item.place === "屯門"
                 )?.value ??
                 dataRhr.temperature.data[0]?.value;
 
@@ -1097,33 +1131,33 @@
 
             const forecastHTML =
                 dataFnd.weatherForecast
-                .slice(0, 7)
-                .map(day => {
-                    const dateText =
-                        day.forecastDate.substring(6, 8) +
-                        "/" +
-                        day.forecastDate.substring(4, 6);
+                    .slice(0, 7)
+                    .map(day => {
+                        const dateText =
+                            day.forecastDate.substring(6, 8) +
+                            "/" +
+                            day.forecastDate.substring(4, 6);
 
-                    const weekText =
-                        day.week.substring(2, 3);
+                        const weekText =
+                            day.week.substring(2, 3);
 
-                    return `
-                        <div class="forecast-day">
-                            <div class="date">
-                                ${dateText}(${weekText})
+                        return `
+                            <div class="forecast-day">
+                                <div class="date">
+                                    ${dateText}(${weekText})
+                                </div>
+
+                                <div class="icon">
+                                    ${getWeatherIcon(day.ForecastIcon)}
+                                </div>
+
+                                <div class="temp">
+                                    ${day.forecastMintemp.value}°-${day.forecastMaxtemp.value}°
+                                </div>
                             </div>
-
-                            <div class="icon">
-                                ${getWeatherIcon(day.ForecastIcon)}
-                            </div>
-
-                            <div class="temp">
-                                ${day.forecastMintemp.value}°-${day.forecastMaxtemp.value}°
-                            </div>
-                        </div>
-                    `;
-                })
-                .join("");
+                        `;
+                    })
+                    .join("");
 
             document.getElementById(
                 "forecast-container"
@@ -1255,33 +1289,33 @@
                     cache: "force-cache"
                 }
             )
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(
-                        `KMB Stop HTTP ${response.status}`
-                    );
-                }
-
-                return response.json();
-            })
-            .then(data => {
-                const map = new Map();
-
-                (data.data || []).forEach(
-                    item => {
-                        map.set(
-                            item.stop,
-                            item
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(
+                            `KMB Stop HTTP ${response.status}`
                         );
                     }
-                );
 
-                return map;
-            })
-            .catch(error => {
-                kmbStopListPromise = null;
-                throw error;
-            });
+                    return response.json();
+                })
+                .then(data => {
+                    const map = new Map();
+
+                    (data.data || []).forEach(
+                        item => {
+                            map.set(
+                                item.stop,
+                                item
+                            );
+                        }
+                    );
+
+                    return map;
+                })
+                .catch(error => {
+                    kmbStopListPromise = null;
+                    throw error;
+                });
 
         return kmbStopListPromise;
     }
@@ -1344,16 +1378,16 @@
 
             const matched =
                 (routeData.data || [])
-                .find(item => {
-                    const stop =
-                        stopMap.get(
-                            item.stop
-                        );
+                    .find(item => {
+                        const stop =
+                            stopMap.get(
+                                item.stop
+                            );
 
-                    return (
-                        stop?.name_tc || ""
-                    ).includes(matchText);
-                });
+                        return (
+                            stop?.name_tc || ""
+                        ).includes(matchText);
+                    });
 
             if (!matched?.stop) {
                 return null;
@@ -1443,8 +1477,10 @@
                             item.route || ""
                         ).toUpperCase() ===
                         bus.route.toUpperCase() &&
-                        (!item.dir ||
-                            item.dir === bus.dir) &&
+                        (
+                            !item.dir ||
+                            item.dir === bus.dir
+                        ) &&
                         item.eta
                     );
                 })
@@ -1475,8 +1511,7 @@
                         mins: Math.max(
                             0,
                             Math.floor(
-                                difference /
-                                60000
+                                difference / 60000
                             )
                         ),
                         timeStr:
@@ -1488,8 +1523,7 @@
                 .filter(Boolean)
                 .sort(
                     (a, b) =>
-                        a.mins -
-                        b.mins
+                        a.mins - b.mins
                 )
                 .slice(0, 3);
 
@@ -1573,8 +1607,7 @@
                 .filter(Boolean)
                 .sort(
                     (a, b) =>
-                        a.mins -
-                        b.mins
+                        a.mins - b.mins
                 )
                 .slice(0, 3);
 
@@ -1676,8 +1709,7 @@
             return results
                 .sort(
                     (a, b) =>
-                        a.mins -
-                        b.mins
+                        a.mins - b.mins
                 )
                 .slice(0, 3);
 
@@ -1738,16 +1770,16 @@
                 if (etas.length > 1) {
                     subHTML =
                         etas.slice(1)
-                        .map(item => {
-                            return (
-                                `<div class="sub-pill">` +
-                                `${item.routeNo}線: ` +
-                                `${item.minsText} ` +
-                                `(${item.timeStr})` +
-                                `</div>`
-                            );
-                        })
-                        .join("");
+                            .map(item => {
+                                return (
+                                    `<div class="sub-pill">` +
+                                    `${item.routeNo}線: ` +
+                                    `${item.minsText} ` +
+                                    `(${item.timeStr})` +
+                                    `</div>`
+                                );
+                            })
+                            .join("");
                 }
             } else {
                 const firstText =
@@ -1764,15 +1796,15 @@
                 if (etas.length > 1) {
                     subHTML =
                         etas.slice(1)
-                        .map(item => {
-                            return (
-                                `<div class="sub-pill">` +
-                                `${item.mins}分 ` +
-                                `(${item.timeStr})` +
-                                `</div>`
-                            );
-                        })
-                        .join("");
+                            .map(item => {
+                                return (
+                                    `<div class="sub-pill">` +
+                                    `${item.mins}分 ` +
+                                    `(${item.timeStr})` +
+                                    `</div>`
+                                );
+                            })
+                            .join("");
                 }
             }
         }
@@ -1911,7 +1943,7 @@
         }
     }
 
-    /* 更新排程 */
+    /* 定時更新 */
 
     let weatherTimer = null;
     let transportTimer = null;
