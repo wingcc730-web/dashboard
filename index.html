@@ -166,9 +166,11 @@
         .card-title {
             font-size: 1.3rem;
             font-weight: bold;
+
             display: flex;
             align-items: center;
             gap: 10px;
+
             min-width: 0;
         }
 
@@ -778,7 +780,7 @@
             class="badge-qixi"
             id="lunar-date"
         >
-            農曆載入中... 🌸
+            農曆日期 🌸
         </div>
 
     </header>
@@ -788,6 +790,7 @@
         <section class="card">
 
             <div class="card-header">
+
                 <div class="card-title">
                     ☀️ 屯門
 
@@ -802,9 +805,11 @@
                 >
                     更新時間 : --:--
                 </div>
+
             </div>
 
             <div class="weather-main">
+
                 <div>
                     <div
                         class="temp-large"
@@ -827,6 +832,7 @@
                 >
                     🌧️
                 </div>
+
             </div>
 
             <div class="weather-grid">
@@ -856,7 +862,9 @@
             <div class="forecast-section">
 
                 <div class="forecast-header">
-                    <div>未來七天天氣預測</div>
+                    <div>
+                        未來七天天氣預測
+                    </div>
 
                     <div style="font-size:0.8rem; color:#999;">
                         天文台自動數據
@@ -901,6 +909,7 @@
         <section class="card">
 
             <div class="card-header">
+
                 <div class="card-title">
                     🚌 交通
                 </div>
@@ -911,6 +920,7 @@
                 >
                     更新時間 : --:--
                 </div>
+
             </div>
 
             <div id="transport-container">
@@ -937,8 +947,7 @@
             "zh-HK",
             {
                 hour: "2-digit",
-                minute: "2-digit",
-                timeZone: "Asia/Hong_Kong"
+                minute: "2-digit"
             }
         );
     }
@@ -950,14 +959,14 @@
                 seconds * 1000
             );
 
-        return etaDate.toLocaleTimeString(
-            "zh-HK",
-            {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-                timeZone: "Asia/Hong_Kong"
-            }
+        return (
+            String(
+                etaDate.getHours()
+            ).padStart(2, "0") +
+            ":" +
+            String(
+                etaDate.getMinutes()
+            ).padStart(2, "0")
         );
     }
 
@@ -1017,54 +1026,23 @@
         );
     }
 
-    /* 香港時間 */
+    /* 農曆日期，只獨立更新右上角標籤 */
 
-    function getHongKongDate() {
-        const parts =
-            new Intl.DateTimeFormat(
-                "en-CA",
-                {
-                    timeZone: "Asia/Hong_Kong",
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                    hourCycle: "h23"
-                }
-            ).formatToParts(
-                new Date()
+    function updateLunarDateSafely() {
+        const lunarElement =
+            getElement(
+                "lunar-date"
             );
 
-        const values = {};
+        if (!lunarElement) {
+            return;
+        }
 
-        parts.forEach(
-            function (part) {
-                if (
-                    part.type !== "literal"
-                ) {
-                    values[part.type] =
-                        part.value;
-                }
-            }
-        );
-
-        return new Date(
-            Number(values.year),
-            Number(values.month) - 1,
-            Number(values.day),
-            Number(values.hour),
-            Number(values.minute),
-            Number(values.second)
-        );
-    }
-
-    /* 農曆日期 */
-
-    function getLunarDateInfo(date) {
         try {
-            const formatter =
+            const now =
+                new Date();
+
+            const lunarFormatter =
                 new Intl.DateTimeFormat(
                     "zh-Hant-u-ca-chinese",
                     {
@@ -1074,182 +1052,84 @@
                     }
                 );
 
-            const parts =
-                formatter.formatToParts(
-                    date
+            let lunarText =
+                lunarFormatter.format(
+                    now
                 );
 
-            let lunarMonth = "";
-            let lunarDay = "";
+            /*
+             * 部分瀏覽器可能輸出空格，
+             * 統一移除多餘空格。
+             */
+            lunarText =
+                lunarText
+                    .replace(/\s+/g, "")
+                    .replace("月月", "月");
 
-            parts.forEach(
-                function (part) {
-                    if (
-                        part.type === "month"
-                    ) {
-                        lunarMonth =
-                            part.value;
-                    }
-
-                    if (
-                        part.type === "day"
-                    ) {
-                        lunarDay =
-                            part.value;
-                    }
+            /*
+             * 根據農曆日期加入節日名稱。
+             * 這只影響右上角文字。
+             */
+            const festivals = [
+                {
+                    match: "正月初一",
+                    name: "農曆新年 🧧"
+                },
+                {
+                    match: "正月十五",
+                    name: "元宵節 🏮"
+                },
+                {
+                    match: "五月初五",
+                    name: "端午節 🐉"
+                },
+                {
+                    match: "七月初七",
+                    name: "七夕 ✨"
+                },
+                {
+                    match: "八月十五",
+                    name: "中秋節 🌕"
+                },
+                {
+                    match: "九月初九",
+                    name: "重陽節 🌼"
                 }
-            );
+            ];
 
-            /*
-             * 部分瀏覽器可能輸出數字日子，
-             * 所以統一轉成農曆中文日期名稱。
-             */
-            const lunarDayNumber =
-                Number(
-                    String(lunarDay)
-                        .replace(/[^\d]/g, "")
+            const festival =
+                festivals.find(
+                    function (item) {
+                        return lunarText.includes(
+                            item.match
+                        );
+                    }
                 );
 
-            if (
-                Number.isFinite(
-                    lunarDayNumber
-                ) &&
-                lunarDayNumber >= 1 &&
-                lunarDayNumber <= 30
-            ) {
-                lunarDay =
-                    getChineseLunarDay(
-                        lunarDayNumber
-                    );
-            }
-
-            /*
-             * 統一月份顯示。
-             */
-            lunarMonth =
-                String(lunarMonth)
-                    .replace("月", "");
-
-            const monthText =
-                lunarMonth.endsWith("月")
-                    ? lunarMonth
-                    : `${lunarMonth}月`;
-
-            return {
-                month:
-                    lunarMonth,
-
-                day:
-                    lunarDay,
-
-                text:
-                    `${monthText}${lunarDay}`
-            };
+            lunarElement.textContent =
+                festival
+                    ? `${lunarText} · ${festival.name} 🌸`
+                    : `${lunarText} 🌸`;
 
         } catch (error) {
-            console.error(
-                "農曆日期轉換失敗",
+            /*
+             * 農曆失敗時只更新右上角提示。
+             * 不拋出錯誤，不影響其他功能。
+             */
+            console.warn(
+                "農曆日期暫時無法顯示",
                 error
             );
 
-            return {
-                month: "",
-                day: "",
-                text: "農曆日期"
-            };
+            lunarElement.textContent =
+                "農曆日期 🌸";
         }
     }
 
-    function getChineseLunarDay(day) {
-        const dayNames = {
-            1: "初一",
-            2: "初二",
-            3: "初三",
-            4: "初四",
-            5: "初五",
-            6: "初六",
-            7: "初七",
-            8: "初八",
-            9: "初九",
-            10: "初十",
-            11: "十一",
-            12: "十二",
-            13: "十三",
-            14: "十四",
-            15: "十五",
-            16: "十六",
-            17: "十七",
-            18: "十八",
-            19: "十九",
-            20: "二十",
-            21: "廿一",
-            22: "廿二",
-            23: "廿三",
-            24: "廿四",
-            25: "廿五",
-            26: "廿六",
-            27: "廿七",
-            28: "廿八",
-            29: "廿九",
-            30: "三十"
-        };
-
-        return dayNames[day] || "";
-    }
-
-    function getLunarFestival(
-        lunarMonth,
-        lunarDay
-    ) {
-        const month =
-            String(lunarMonth)
-                .replace("月", "")
-                .replace("閏", "");
-
-        const key =
-            `${month}-${lunarDay}`;
-
-        const festivals = {
-            "正-初一": "農曆新年 🧧",
-            "正-十五": "元宵節 🏮",
-            "五-初五": "端午節 🐉",
-            "七-初七": "七夕 ✨",
-            "八-十五": "中秋節 🌕",
-            "九-初九": "重陽節 🌼",
-            "十二-初八": "臘八節 🍚"
-        };
-
-        return festivals[key] || "";
-    }
-
-    function updateLunarDate() {
-        const hongKongDate =
-            getHongKongDate();
-
-        const lunar =
-            getLunarDateInfo(
-                hongKongDate
-            );
-
-        const festival =
-            getLunarFestival(
-                lunar.month,
-                lunar.day
-            );
-
-        getElement(
-            "lunar-date"
-        ).textContent =
-            festival
-                ? `${lunar.text} ✨ ${festival} 🌸`
-                : `${lunar.text} 🌸`;
-    }
-
-    /* 時鐘及公曆日期 */
+    /* 時鐘及日期 */
 
     function updateClock() {
-        const now =
-            getHongKongDate();
+        const now = new Date();
 
         const hh =
             String(
@@ -1289,8 +1169,11 @@
             `(${days[now.getDay()]}) 🌸`;
     }
 
+    /*
+     * 時鐘獨立啟動。
+     * 農曆功能不會阻止時鐘。
+     */
     updateClock();
-    updateLunarDate();
 
     setInterval(
         updateClock,
@@ -1298,11 +1181,12 @@
     );
 
     /*
-     * 每小時重新檢查農曆日期。
-     * 即使網頁長期開啟，過午夜後亦會自動更新。
+     * 農曆獨立啟動。
      */
+    updateLunarDateSafely();
+
     setInterval(
-        updateLunarDate,
+        updateLunarDateSafely,
         60 * 60 * 1000
     );
 
@@ -1541,6 +1425,7 @@
 
                         return `
                             <div class="forecast-day">
+
                                 <div class="date">
                                     ${dateText}(${weekText})
                                 </div>
@@ -1552,6 +1437,7 @@
                                 <div class="temp">
                                     ${day.forecastMintemp.value}°-${day.forecastMaxtemp.value}°
                                 </div>
+
                             </div>
                         `;
                     })
@@ -1626,85 +1512,4 @@
             route: "258D",
             dir: "O",
             dest: "藍田站",
-            stopName: "聖彼得堂"
-        },
-        {
-            type: "MTR",
-            route: "K53S",
-            dest: "屯門站",
-            stopName: "業旺邨"
-        },
-        {
-            type: "LRT",
-            route: "輕鐵",
-            dest: "元朗",
-            stationId: "040",
-            stopName: "青山村"
-        }
-    ];
-
-    let transportIsLoading = false;
-    let kmbStopMapPromise = null;
-
-    const KMB_CACHE_KEY =
-        "dashboard_stop_ids_v9";
-
-    function readStopCache() {
-        try {
-            return JSON.parse(
-                localStorage.getItem(
-                    KMB_CACHE_KEY
-                ) || "{}"
-            );
-        } catch (error) {
-            return {};
-        }
-    }
-
-    function saveStopCache(cache) {
-        try {
-            localStorage.setItem(
-                KMB_CACHE_KEY,
-                JSON.stringify(cache)
-            );
-        } catch (error) {
-            console.warn(
-                "未能儲存站點快取",
-                error
-            );
-        }
-    }
-
-    const stopIdCache =
-        readStopCache();
-
-    async function getKmbStopMap() {
-        if (kmbStopMapPromise) {
-            return kmbStopMapPromise;
-        }
-
-        kmbStopMapPromise =
-            fetch(
-                `${KMB_BASE}/stop`,
-                {
-                    cache: "force-cache"
-                }
-            )
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error(
-                        `KMB Stop HTTP ${response.status}`
-                    );
-                }
-
-                return response.json();
-            })
-            .then(function (data) {
-                const map = new Map();
-
-                (data.data || []).forEach(
-                    function (item) {
-                        map.set(
-                            item.stop,
-                            item
-                        
+            stopName
