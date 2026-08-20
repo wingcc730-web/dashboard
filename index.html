@@ -241,3 +241,1470 @@
             background: #e6f6f4;
         }
 
+        .w-item.uv {
+            background: #ffebee;
+        }
+
+        .w-item.humidity {
+            background: #e3f2fd;
+        }
+
+        .w-item.rain {
+            background: #fff8e1;
+        }
+
+        .forecast-section,
+        .calendar-section {
+            border-top: 2px dashed var(--card-border);
+            padding-top: 15px;
+        }
+
+        .calendar-section {
+            margin-top: 20px;
+        }
+
+        .forecast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .forecast-container {
+            display: flex;
+            gap: 12px;
+
+            overflow-x: auto;
+            overflow-y: hidden;
+
+            padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .forecast-day {
+            flex: 0 0 auto;
+            text-align: center;
+            background: #fcfcfc;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 10px;
+            min-width: 75px;
+        }
+
+        .forecast-day .date {
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .forecast-day .icon {
+            font-size: 1.6rem;
+            margin: 6px 0;
+        }
+
+        .forecast-day .temp {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .calendar-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            background: #fff;
+            min-height: 280px;
+        }
+
+        .calendar-wrapper iframe {
+            display: block;
+            width: 100%;
+            height: 280px;
+            border: 0;
+        }
+
+        .bus-card {
+            border: 2px solid #f5f5f5;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .bus-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .bus-main {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            min-width: 0;
+        }
+
+        .bus-route-box {
+            background: var(--teal-main);
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-right: 15px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .bus-route-box.kmb-box {
+            background: var(--kmb-red);
+        }
+
+        .bus-route-box.lrt-box {
+            background: #f39c12;
+        }
+
+        .bus-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .bus-dest {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .bus-stop {
+            font-size: 0.85rem;
+            color: #e91e63;
+            margin-top: 4px;
+        }
+
+        .bus-eta-group {
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .bus-eta-main {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--teal-main);
+            white-space: nowrap;
+        }
+
+        .eta-time-tag {
+            background: #e6f6f4;
+            color: var(--teal-main);
+            font-size: 0.95rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .bus-sub {
+            border-top: 2px dashed #f5f5f5;
+            padding-top: 12px;
+            font-size: 0.95rem;
+            color: #666;
+
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sub-pill {
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: #555;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .loading-message {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #eedddf;
+            border-radius: 10px;
+        }
+
+        @media only screen and (max-width: 800px) {
+            body {
+                padding-top: max(10px, var(--safe-top));
+                padding-right: max(10px, var(--safe-right));
+                padding-bottom: max(10px, var(--safe-bottom));
+                padding-left: max(10px, var(--safe-left));
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .top-bar {
+                padding: 14px;
+                margin-bottom: 12px;
+            }
+
+            .clock-time {
+                font-size: 2.2rem;
+            }
+
+            .clock-date {
+                font-size: 1.2rem;
+            }
+
+            .badge-qixi {
+                display: none;
+            }
+
+            .card {
+                padding: 14px;
+                margin-bottom: 12px;
+            }
+
+            .weather-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .bus-main {
+                align-items: flex-start;
+            }
+
+            .bus-eta-main {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media only screen
+            and (orientation: landscape)
+            and (max-height: 500px) {
+
+            html {
+                font-size: 13px;
+            }
+
+            body {
+                padding-top: max(6px, var(--safe-top));
+                padding-right: max(8px, var(--safe-right));
+                padding-bottom: max(8px, var(--safe-bottom));
+                padding-left: max(8px, var(--safe-left));
+            }
+
+            .dashboard {
+                max-width: none;
+            }
+
+            .top-bar {
+                padding: 7px 14px;
+                margin-bottom: 8px;
+                border-radius: 14px;
+            }
+
+            .top-bar-left {
+                gap: 10px;
+            }
+
+            .clock-time {
+                font-size: 2rem;
+                letter-spacing: 1px;
+            }
+
+            .clock-date {
+                font-size: 0.95rem;
+            }
+
+            .badge-qixi {
+                display: block;
+                font-size: 0.8rem;
+                padding: 5px 10px;
+            }
+
+            .content-grid {
+                grid-template-columns:
+                    minmax(0, 1.05fr)
+                    minmax(0, 0.95fr);
+
+                gap: 8px;
+            }
+
+            .card {
+                padding: 9px;
+                border-radius: 14px;
+                margin-bottom: 8px;
+            }
+
+            .card-header {
+                padding-bottom: 7px;
+                margin-bottom: 8px;
+            }
+
+            .card-title {
+                font-size: 1rem;
+                gap: 4px;
+            }
+
+            .weather-label {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+                margin-left: 3px;
+            }
+
+            .update-time {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+            }
+
+            .weather-main {
+                margin-bottom: 8px;
+            }
+
+            .temp-large {
+                font-size: 3rem;
+            }
+
+            .temp-range {
+                font-size: 0.72rem;
+                margin-top: 4px;
+            }
+
+            .weather-icon-large {
+                font-size: 2.8rem;
+            }
+
+            .weather-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-bottom: 8px;
+            }
+
+            .w-item {
+                padding: 7px;
+                border-radius: 8px;
+                font-size: 0.72rem;
+            }
+
+            .forecast-section {
+                padding-top: 7px;
+            }
+
+            .forecast-header {
+                font-size: 0.72rem;
+                margin-bottom: 6px;
+            }
+
+            .forecast-container {
+                gap: 5px;
+                padding-bottom: 4px;
+            }
+
+            .forecast-day {
+                min-width: 55px;
+                padding: 5px;
+                border-radius: 8px;
+            }
+
+            .forecast-day .date {
+                font-size: 0.66rem;
+            }
+
+            .forecast-day .icon {
+                font-size: 1.05rem;
+                margin: 2px 0;
+            }
+
+            .forecast-day .temp {
+                font-size: 0.64rem;
+            }
+
+            .calendar-section {
+                margin-top: 8px;
+                padding-top: 7px;
+            }
+
+            .calendar-wrapper,
+            .calendar-wrapper iframe {
+                height: 170px;
+                min-height: 170px;
+            }
+
+            .bus-card {
+                padding: 7px;
+                margin-bottom: 5px;
+                border-radius: 10px;
+            }
+
+            .bus-main {
+                margin-bottom: 5px;
+            }
+
+            .bus-route-box {
+                font-size: 0.88rem;
+                padding: 4px 7px;
+                border-radius: 6px;
+                margin-right: 7px;
+            }
+
+            .bus-dest {
+                font-size: 0.75rem;
+            }
+
+            .bus-stop {
+                font-size: 0.62rem;
+                margin-top: 2px;
+            }
+
+            .bus-eta-main {
+                font-size: 0.92rem;
+            }
+
+            .eta-time-tag {
+                font-size: 0.64rem;
+                padding: 2px 4px;
+            }
+
+            .bus-sub {
+                padding-top: 5px;
+                font-size: 0.62rem;
+                gap: 4px;
+            }
+
+            .sub-pill {
+                padding: 2px 5px;
+                font-size: 0.61rem;
+            }
+        }
+
+        @media only screen
+            and (min-width: 801px)
+            and (max-width: 1400px)
+            and (min-height: 501px) {
+
+            body {
+                padding-top: max(14px, var(--safe-top));
+                padding-right: max(14px, var(--safe-right));
+                padding-bottom: max(14px, var(--safe-bottom));
+                padding-left: max(14px, var(--safe-left));
+            }
+
+            .dashboard {
+                max-width: 1200px;
+            }
+
+            .content-grid {
+                gap: 14px;
+            }
+
+            .top-bar {
+                padding: 14px 20px;
+                margin-bottom: 14px;
+            }
+
+            .clock-date {
+                font-size: 1.3rem;
+            }
+
+            .card {
+                padding: 15px;
+                border-radius: 16px;
+            }
+
+            .weather-grid {
+                gap: 10px;
+            }
+
+            .w-item {
+                padding: 11px;
+                font-size: 0.9rem;
+            }
+
+            .calendar-wrapper,
+            .calendar-wrapper iframe {
+                height: 240px;
+                min-height: 240px;
+            }
+
+            .bus-card {
+                padding: 11px;
+                margin-bottom: 10px;
+            }
+
+            .bus-route-box {
+                font-size: 1.05rem;
+                padding: 5px 9px;
+                margin-right: 9px;
+            }
+
+            .bus-eta-main {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <header class="top-bar">
+
+        <div class="top-bar-left">
+            <div
+                class="clock-time"
+                id="clock-time"
+            >
+                00:00:00
+            </div>
+
+            <div
+                class="clock-date"
+                id="clock-date"
+            >
+                --月--日 (-) 🌸
+            </div>
+        </div>
+
+        <div
+            class="badge-qixi"
+            id="lunar-date"
+        >
+            農曆載入中... 🌸
+        </div>
+
+    </header>
+
+    <main class="content-grid">
+
+        <section class="card">
+
+            <div class="card-header">
+                <div class="card-title">
+                    ☀️ 屯門
+
+                    <span class="weather-label">
+                        🎐 天氣資訊
+                    </span>
+                </div>
+
+                <div
+                    class="update-time"
+                    id="weather-update-time"
+                >
+                    更新時間 : --:--
+                </div>
+            </div>
+
+            <div class="weather-main">
+                <div>
+                    <div
+                        class="temp-large"
+                        id="current-temp"
+                    >
+                        --°
+                    </div>
+
+                    <div
+                        class="temp-range"
+                        id="temp-range"
+                    >
+                        今日預測 : --°C - --°C
+                    </div>
+                </div>
+
+                <div
+                    class="weather-icon-large"
+                    id="main-weather-icon"
+                >
+                    🌧️
+                </div>
+            </div>
+
+            <div class="weather-grid">
+
+                <div class="w-item apparent">
+                    <span>🌡️ 體感溫度</span>
+                    <span id="apparent-temp">--°C</span>
+                </div>
+
+                <div class="w-item uv">
+                    <span>☀️ 紫外線指數</span>
+                    <span id="current-uv">--</span>
+                </div>
+
+                <div class="w-item humidity">
+                    <span>💧 相對濕度</span>
+                    <span id="current-humidity">--%</span>
+                </div>
+
+                <div class="w-item rain">
+                    <span>☂️ 降雨概率</span>
+                    <span id="rain-prob">--%</span>
+                </div>
+
+            </div>
+
+            <div class="forecast-section">
+
+                <div class="forecast-header">
+                    <div>未來七天天氣預測</div>
+
+                    <div style="font-size:0.8rem; color:#999;">
+                        天文台自動數據
+                    </div>
+                </div>
+
+                <div
+                    id="forecast-container"
+                    class="forecast-container"
+                >
+                    <div class="loading-message">
+                        載入中...
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="calendar-section">
+
+                <div class="forecast-header">
+                    <div>
+                        📅 Google 日曆行程及香港假期
+                    </div>
+                </div>
+
+                <div
+                    class="calendar-wrapper"
+                    id="calendar-wrapper"
+                >
+                    <div
+                        class="loading-message"
+                        style="padding:14px;"
+                    >
+                        載入月曆中...
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="card-header">
+                <div class="card-title">
+                    🚌 交通
+                </div>
+
+                <div
+                    class="update-time"
+                    id="transport-update-time"
+                >
+                    更新時間 : --:--
+                </div>
+            </div>
+
+            <div id="transport-container">
+                <div class="loading-message">
+                    載入中...
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script>
+    "use strict";
+
+    function getElement(id) {
+        return document.getElementById(id);
+    }
+
+    function getCurrentTimeText() {
+        return new Date().toLocaleTimeString(
+            "zh-HK",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: "Asia/Hong_Kong"
+            }
+        );
+    }
+
+    function getEtaClockTime(seconds) {
+        const etaDate =
+            new Date(
+                Date.now() +
+                seconds * 1000
+            );
+
+        return etaDate.toLocaleTimeString(
+            "zh-HK",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+                timeZone: "Asia/Hong_Kong"
+            }
+        );
+    }
+
+    /* Google Calendar */
+
+    function loadCalendar() {
+        const calendarParts = [
+            "https://calendar.google.com/calendar/embed?height=300",
+            "&wkst=1",
+            "&ctz=Asia%2FHong_Kong",
+            "&showTitle=0",
+            "&showNav=1",
+            "&showPrint=0",
+            "&showTabs=0",
+            "&showCalendars=1",
+            "&mode=MONTH",
+
+            "&src=dc89b4793ace2057fecdec46d4993dd5afe36ad943d15934b7b00a099a2d63f6%40group.calendar.google.com",
+            "&color=%238E24AA",
+
+            "&src=46b5edaa088a96fb4cf4a2ce028f4fad9be8c6225b65add94502c53809cf63df%40group.calendar.google.com",
+            "&color=%233F51B5",
+
+            "&src=f438bd70999c821aadcda50f018273bbf83a40495fca259c10d826477a34eaf1%40group.calendar.google.com",
+            "&color=%230B8043",
+
+            "&src=zh.hong_kong%23holiday%40group.v.calendar.google.com",
+            "&color=%23D50000"
+        ];
+
+        const calendarFrame =
+            document.createElement("iframe");
+
+        calendarFrame.src =
+            calendarParts.join("");
+
+        calendarFrame.title =
+            "Google 日曆行程及香港假期";
+
+        calendarFrame.loading =
+            "lazy";
+
+        calendarFrame.setAttribute(
+            "frameborder",
+            "0"
+        );
+
+        calendarFrame.setAttribute(
+            "scrolling",
+            "no"
+        );
+
+        getElement(
+            "calendar-wrapper"
+        ).replaceChildren(
+            calendarFrame
+        );
+    }
+
+    /* 香港時間 */
+
+    function getHongKongDate() {
+        const parts =
+            new Intl.DateTimeFormat(
+                "en-CA",
+                {
+                    timeZone: "Asia/Hong_Kong",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hourCycle: "h23"
+                }
+            ).formatToParts(
+                new Date()
+            );
+
+        const values = {};
+
+        parts.forEach(
+            function (part) {
+                if (
+                    part.type !== "literal"
+                ) {
+                    values[part.type] =
+                        part.value;
+                }
+            }
+        );
+
+        return new Date(
+            Number(values.year),
+            Number(values.month) - 1,
+            Number(values.day),
+            Number(values.hour),
+            Number(values.minute),
+            Number(values.second)
+        );
+    }
+
+    /* 農曆日期 */
+
+    function getLunarDateInfo(date) {
+        try {
+            const formatter =
+                new Intl.DateTimeFormat(
+                    "zh-Hant-u-ca-chinese",
+                    {
+                        month: "long",
+                        day: "numeric",
+                        timeZone: "Asia/Hong_Kong"
+                    }
+                );
+
+            const parts =
+                formatter.formatToParts(
+                    date
+                );
+
+            let lunarMonth = "";
+            let lunarDay = "";
+
+            parts.forEach(
+                function (part) {
+                    if (
+                        part.type === "month"
+                    ) {
+                        lunarMonth =
+                            part.value;
+                    }
+
+                    if (
+                        part.type === "day"
+                    ) {
+                        lunarDay =
+                            part.value;
+                    }
+                }
+            );
+
+            /*
+             * 部分瀏覽器可能輸出數字日子，
+             * 所以統一轉成農曆中文日期名稱。
+             */
+            const lunarDayNumber =
+                Number(
+                    String(lunarDay)
+                        .replace(/[^\d]/g, "")
+                );
+
+            if (
+                Number.isFinite(
+                    lunarDayNumber
+                ) &&
+                lunarDayNumber >= 1 &&
+                lunarDayNumber <= 30
+            ) {
+                lunarDay =
+                    getChineseLunarDay(
+                        lunarDayNumber
+                    );
+            }
+
+            /*
+             * 統一月份顯示。
+             */
+            lunarMonth =
+                String(lunarMonth)
+                    .replace("月", "");
+
+            const monthText =
+                lunarMonth.endsWith("月")
+                    ? lunarMonth
+                    : `${lunarMonth}月`;
+
+            return {
+                month:
+                    lunarMonth,
+
+                day:
+                    lunarDay,
+
+                text:
+                    `${monthText}${lunarDay}`
+            };
+
+        } catch (error) {
+            console.error(
+                "農曆日期轉換失敗",
+                error
+            );
+
+            return {
+                month: "",
+                day: "",
+                text: "農曆日期"
+            };
+        }
+    }
+
+    function getChineseLunarDay(day) {
+        const dayNames = {
+            1: "初一",
+            2: "初二",
+            3: "初三",
+            4: "初四",
+            5: "初五",
+            6: "初六",
+            7: "初七",
+            8: "初八",
+            9: "初九",
+            10: "初十",
+            11: "十一",
+            12: "十二",
+            13: "十三",
+            14: "十四",
+            15: "十五",
+            16: "十六",
+            17: "十七",
+            18: "十八",
+            19: "十九",
+            20: "二十",
+            21: "廿一",
+            22: "廿二",
+            23: "廿三",
+            24: "廿四",
+            25: "廿五",
+            26: "廿六",
+            27: "廿七",
+            28: "廿八",
+            29: "廿九",
+            30: "三十"
+        };
+
+        return dayNames[day] || "";
+    }
+
+    function getLunarFestival(
+        lunarMonth,
+        lunarDay
+    ) {
+        const month =
+            String(lunarMonth)
+                .replace("月", "")
+                .replace("閏", "");
+
+        const key =
+            `${month}-${lunarDay}`;
+
+        const festivals = {
+            "正-初一": "農曆新年 🧧",
+            "正-十五": "元宵節 🏮",
+            "五-初五": "端午節 🐉",
+            "七-初七": "七夕 ✨",
+            "八-十五": "中秋節 🌕",
+            "九-初九": "重陽節 🌼",
+            "十二-初八": "臘八節 🍚"
+        };
+
+        return festivals[key] || "";
+    }
+
+    function updateLunarDate() {
+        const hongKongDate =
+            getHongKongDate();
+
+        const lunar =
+            getLunarDateInfo(
+                hongKongDate
+            );
+
+        const festival =
+            getLunarFestival(
+                lunar.month,
+                lunar.day
+            );
+
+        getElement(
+            "lunar-date"
+        ).textContent =
+            festival
+                ? `${lunar.text} ✨ ${festival} 🌸`
+                : `${lunar.text} 🌸`;
+    }
+
+    /* 時鐘及公曆日期 */
+
+    function updateClock() {
+        const now =
+            getHongKongDate();
+
+        const hh =
+            String(
+                now.getHours()
+            ).padStart(2, "0");
+
+        const mm =
+            String(
+                now.getMinutes()
+            ).padStart(2, "0");
+
+        const ss =
+            String(
+                now.getSeconds()
+            ).padStart(2, "0");
+
+        const days = [
+            "日",
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六"
+        ];
+
+        getElement(
+            "clock-time"
+        ).textContent =
+            `${hh}:${mm}:${ss}`;
+
+        getElement(
+            "clock-date"
+        ).textContent =
+            `${now.getMonth() + 1}月` +
+            `${now.getDate()}日 ` +
+            `(${days[now.getDay()]}) 🌸`;
+    }
+
+    updateClock();
+    updateLunarDate();
+
+    setInterval(
+        updateClock,
+        1000
+    );
+
+    /*
+     * 每小時重新檢查農曆日期。
+     * 即使網頁長期開啟，過午夜後亦會自動更新。
+     */
+    setInterval(
+        updateLunarDate,
+        60 * 60 * 1000
+    );
+
+    /* 天氣 */
+
+    const HKO_RHRREAD =
+        "https://data.weather.gov.hk/" +
+        "weatherAPI/opendata/weather.php" +
+        "?dataType=rhrread&lang=tc";
+
+    const HKO_FND =
+        "https://data.weather.gov.hk/" +
+        "weatherAPI/opendata/weather.php" +
+        "?dataType=fnd&lang=tc";
+
+    const RAIN_PROBABILITY_API =
+        "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=22.3918" +
+        "&longitude=113.9716" +
+        "&hourly=precipitation_probability" +
+        "&forecast_days=1" +
+        "&timezone=Asia%2FHong_Kong";
+
+    const weatherIcons = {
+        1: "☀️",
+        2: "🌤️",
+        3: "⛅",
+        4: "☁️",
+        5: "🌥️",
+        6: "🌧️",
+        7: "🌩️",
+        8: "⛈️",
+        9: "🌫️"
+    };
+
+    let weatherIsLoading = false;
+
+    function getWeatherIcon(iconCode) {
+        return weatherIcons[iconCode] || "🌤️";
+    }
+
+    function getHongKongHourKey() {
+        const parts =
+            new Intl.DateTimeFormat(
+                "en-CA",
+                {
+                    timeZone:
+                        "Asia/Hong_Kong",
+
+                    year:
+                        "numeric",
+
+                    month:
+                        "2-digit",
+
+                    day:
+                        "2-digit",
+
+                    hour:
+                        "2-digit",
+
+                    hourCycle:
+                        "h23"
+                }
+            ).formatToParts(
+                new Date()
+            );
+
+        const values = {};
+
+        parts.forEach(
+            function (part) {
+                values[part.type] =
+                    part.value;
+            }
+        );
+
+        return (
+            `${values.year}-` +
+            `${values.month}-` +
+            `${values.day}T` +
+            `${values.hour}:00`
+        );
+    }
+
+    async function fetchWeather() {
+        if (weatherIsLoading) {
+            return;
+        }
+
+        weatherIsLoading = true;
+
+        try {
+            const responses =
+                await Promise.all([
+                    fetch(
+                        HKO_RHRREAD,
+                        {
+                            cache: "no-store"
+                        }
+                    ),
+
+                    fetch(
+                        HKO_FND,
+                        {
+                            cache: "no-store"
+                        }
+                    ),
+
+                    fetch(
+                        RAIN_PROBABILITY_API,
+                        {
+                            cache: "no-store"
+                        }
+                    )
+                ]);
+
+            if (
+                !responses[0].ok ||
+                !responses[1].ok
+            ) {
+                throw new Error(
+                    "天氣 API HTTP 錯誤"
+                );
+            }
+
+            const dataRhr =
+                await responses[0].json();
+
+            const dataFnd =
+                await responses[1].json();
+
+            let rainProbability =
+                null;
+
+            if (responses[2].ok) {
+                const rainData =
+                    await responses[2].json();
+
+                const hourKey =
+                    getHongKongHourKey();
+
+                const hourIndex =
+                    rainData.hourly?.time?.indexOf(
+                        hourKey
+                    ) ?? -1;
+
+                if (hourIndex >= 0) {
+                    const value =
+                        Number(
+                            rainData
+                                .hourly
+                                .precipitation_probability[
+                                    hourIndex
+                                ]
+                        );
+
+                    if (
+                        Number.isFinite(value)
+                    ) {
+                        rainProbability =
+                            value;
+                    }
+                }
+            }
+
+            const tmTemp =
+                dataRhr.temperature.data.find(
+                    function (item) {
+                        return item.place === "屯門";
+                    }
+                )?.value ??
+                dataRhr.temperature.data[0]?.value;
+
+            getElement(
+                "current-temp"
+            ).textContent =
+                `${tmTemp}°`;
+
+            getElement(
+                "apparent-temp"
+            ).textContent =
+                `${(Number(tmTemp) + 2.5).toFixed(1)}°C`;
+
+            getElement(
+                "current-humidity"
+            ).textContent =
+                `${dataRhr.humidity.data[0]?.value ?? "--"}%`;
+
+            const uv =
+                dataRhr.uvindex?.data?.[0];
+
+            getElement(
+                "current-uv"
+            ).textContent =
+                `${uv?.value ?? "--"}` +
+                `${uv?.desc ? " · " + uv.desc : ""}`;
+
+            const today =
+                dataFnd.weatherForecast[0];
+
+            getElement(
+                "temp-range"
+            ).textContent =
+                `今日預測 : ` +
+                `${today.forecastMintemp.value}°C - ` +
+                `${today.forecastMaxtemp.value}°C`;
+
+            getElement(
+                "rain-prob"
+            ).textContent =
+                Number.isFinite(
+                    rainProbability
+                )
+                    ? `${rainProbability}%`
+                    : "--%";
+
+            getElement(
+                "main-weather-icon"
+            ).textContent =
+                getWeatherIcon(
+                    today.ForecastIcon
+                );
+
+            const forecastHTML =
+                dataFnd.weatherForecast
+                    .slice(0, 7)
+                    .map(function (day) {
+                        const dateText =
+                            day.forecastDate.substring(6, 8) +
+                            "/" +
+                            day.forecastDate.substring(4, 6);
+
+                        const weekText =
+                            day.week.substring(2, 3);
+
+                        return `
+                            <div class="forecast-day">
+                                <div class="date">
+                                    ${dateText}(${weekText})
+                                </div>
+
+                                <div class="icon">
+                                    ${getWeatherIcon(day.ForecastIcon)}
+                                </div>
+
+                                <div class="temp">
+                                    ${day.forecastMintemp.value}°-${day.forecastMaxtemp.value}°
+                                </div>
+                            </div>
+                        `;
+                    })
+                    .join("");
+
+            getElement(
+                "forecast-container"
+            ).innerHTML =
+                forecastHTML;
+
+            getElement(
+                "weather-update-time"
+            ).textContent =
+                `更新時間 : ${getCurrentTimeText()}`;
+
+        } catch (error) {
+            console.error(
+                "天氣獲取失敗",
+                error
+            );
+
+            getElement(
+                "forecast-container"
+            ).innerHTML =
+                `<div class="loading-message">` +
+                `暫時未能取得預測。` +
+                `</div>`;
+
+        } finally {
+            weatherIsLoading = false;
+        }
+    }
+
+    /* 交通 */
+
+    const KMB_BASE =
+        "https://data.etabus.gov.hk/" +
+        "v1/transport/kmb";
+
+    const MTR_BUS_BASE =
+        "https://rt.data.gov.hk/" +
+        "v1/transport/mtr/bus/getSchedule";
+
+    const MTR_LRT_BASE =
+        "https://rt.data.gov.hk/" +
+        "v1/transport/mtr/lrt/getSchedule";
+
+    const busRoutes = [
+        {
+            type: "KMB",
+            route: "57M",
+            dir: "O",
+            dest: "荔景 (北)",
+            stopName: "業旺邨"
+        },
+        {
+            type: "KMB",
+            route: "66X",
+            dir: "O",
+            dest: "奧運站",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "KMB",
+            route: "66M",
+            dir: "O",
+            dest: "荃灣 (如心廣場)",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "KMB",
+            route: "258D",
+            dir: "O",
+            dest: "藍田站",
+            stopName: "聖彼得堂"
+        },
+        {
+            type: "MTR",
+            route: "K53S",
+            dest: "屯門站",
+            stopName: "業旺邨"
+        },
+        {
+            type: "LRT",
+            route: "輕鐵",
+            dest: "元朗",
+            stationId: "040",
+            stopName: "青山村"
+        }
+    ];
+
+    let transportIsLoading = false;
+    let kmbStopMapPromise = null;
+
+    const KMB_CACHE_KEY =
+        "dashboard_stop_ids_v9";
+
+    function readStopCache() {
+        try {
+            return JSON.parse(
+                localStorage.getItem(
+                    KMB_CACHE_KEY
+                ) || "{}"
+            );
+        } catch (error) {
+            return {};
+        }
+    }
+
+    function saveStopCache(cache) {
+        try {
+            localStorage.setItem(
+                KMB_CACHE_KEY,
+                JSON.stringify(cache)
+            );
+        } catch (error) {
+            console.warn(
+                "未能儲存站點快取",
+                error
+            );
+        }
+    }
+
+    const stopIdCache =
+        readStopCache();
+
+    async function getKmbStopMap() {
+        if (kmbStopMapPromise) {
+            return kmbStopMapPromise;
+        }
+
+        kmbStopMapPromise =
+            fetch(
+                `${KMB_BASE}/stop`,
+                {
+                    cache: "force-cache"
+                }
+            )
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error(
+                        `KMB Stop HTTP ${response.status}`
+                    );
+                }
+
+                return response.json();
+            })
+            .then(function (data) {
+                const map = new Map();
+
+                (data.data || []).forEach(
+                    function (item) {
+                        map.set(
+                            item.stop,
+                            item
+                        
